@@ -1,0 +1,171 @@
+// Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  iconUrl  String?   @map("icon_url")
+  icon     String?   // Lucide图标名称
+  order    Int       @default(0)
+  
+  // 多级分类支持
+  parentId Int?      @map("parent_id")
+  parent   Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  
+  websites Website[]
+  submissions Submission[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([order])
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Website {
+  id            Int      @id @default(autoincrement())
+  name          String?
+  url           String
+  iconUrl       String?  @map("icon_url")
+  description   String?
+  order         Int      @default(0)
+  isRecommended Boolean  @default(false) @map("is_recommended")
+  categoryId    Int      @map("category_id")
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  // 标签关联
+  websiteTags   WebsiteTag[]
+  
+  // 访问统计关联
+  visits        WebsiteVisit[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+   @@index([categoryId, order])
+   @@index([isRecommended])
+  @@map("websites")
+}
+
+model Tag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  color       String?  // 标签颜色
+  description String?
+  
+  // 网址关联
+  websiteTags WebsiteTag[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tags")
+}
+
+model WebsiteTag {
+  id        Int     @id @default(autoincrement())
+  websiteId Int     @map("website_id")
+  tagId     Int     @map("tag_id")
+  
+  website   Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([websiteId, tagId])
+  @@index([websiteId])
+  @@index([tagId])
+  @@map("website_tags")
+}
+
+model Admin {
+  id           Int     @id @default(autoincrement())
+  username     String  @unique
+  passwordHash String  @map("password_hash")
+  refreshToken String? @map("refresh_token")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model WebsiteVisit {
+  id          Int      @id @default(autoincrement())
+  websiteId   Int      @map("website_id")
+  date        DateTime @db.Date // 只存储日期部分
+  mobileVisits Int     @default(0) @map("mobile_visits") // 移动端访问数
+  desktopVisits Int    @default(0) @map("desktop_visits") // PC端访问数
+  
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([websiteId, date]) // 确保每个网站每天只有一条记录
+  @@index([websiteId])
+  @@index([date])
+  @@map("website_visits")
+}
+
+model Submission {
+  id           Int      @id @default(autoincrement())
+  name         String   // 网站名称
+  url          String   // 网站URL
+  description  String   // 网站描述
+  categoryId   Int      @map("category_id") // 申请的分类ID
+  tags         String?  // 标签（逗号分隔的字符串）
+  contactEmail String   @map("contact_email") // 联系邮箱
+  status       String   @default("pending") // 状态：pending, approved, rejected
+  adminNote    String?  @map("admin_note") // 管理员备注
+  
+  category     Category @relation(fields: [categoryId], references: [id])
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([createdAt])
+  @@map("submissions")
+}
+
+model NavigationPage {
+  id              Int      @id @default(autoincrement())
+  name            String   // 导航页名称
+  slug            String   @unique // URL路径标识符
+  title           String   // SEO标题
+  description     String?  // SEO描述
+  keywords        String?  // SEO关键词
+  isActive        Boolean  @default(true) @map("is_active") // 是否启用
+  
+  // 分类配置
+  sidebarCategories String? @map("sidebar_categories") // 侧边栏显示的分类ID（JSON数组字符串）
+  headerCategories  String? @map("header_categories")  // 顶部导航显示的分类ID（JSON数组字符串）
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("navigation_pages")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
