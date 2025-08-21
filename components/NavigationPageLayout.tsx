@@ -101,6 +101,7 @@ export function NavigationPageLayout({
       const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
+        // API返回包含categories和hierarchical字段的对象
         const allCategories = data.categories || [];
         
         // 构建分类映射

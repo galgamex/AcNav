@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
             <div className="p-4 border rounded-lg">
               <h3 className="font-medium mb-2">1. 创建分类</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                首先创建网站分类，如"搜索引擎"、"社交媒体"等
+                首先创建网站分类，如&ldquo;搜索引擎&rdquo;、&ldquo;社交媒体&rdquo;等
               </p>
             </div>
             <div className="p-4 border rounded-lg">

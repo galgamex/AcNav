@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +32,7 @@ interface PaginationInfo {
 }
 
 export default function PageSettingsPage() {
+  const { admin, loading: authLoading, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'home' | 'navigation'>('home');
   const [navigationPages, setNavigationPages] = useState<NavigationPage[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -100,38 +102,23 @@ export default function PageSettingsPage() {
       const response = await fetch('/api/categories');
       if (response.ok) {
         const data = await response.json();
-        // 构建层级结构的分类数据
-        const allCategories = data.categories || [];
-        const categoryMap = new Map();
-        const hierarchicalCategories: any[] = [];
-
-        // 先创建所有分类的映射
-        allCategories.forEach((category: any) => {
-          categoryMap.set(category.id, { ...category, children: [] });
-        });
-
-        // 构建层级关系
-        allCategories.forEach((category: any) => {
-          if (category.parentId) {
-            const parent = categoryMap.get(category.parentId);
-            if (parent) {
-              parent.children.push(categoryMap.get(category.id));
-            }
-          } else {
-            hierarchicalCategories.push(categoryMap.get(category.id));
-          }
-        });
-
-        setCategories(hierarchicalCategories);
+        console.log('分类数据:', data); // 添加调试日志
+        
+        // 使用API返回的分类数据
+        const categoriesData = data.hierarchical || data.categories || data || [];
+        console.log('处理后的分类数据:', categoriesData);
+        setCategories(categoriesData);
         
         // 初始化时默认折叠所有有子分类的分类
         const initCollapsed = new Set<number>();
-        hierarchicalCategories.forEach(category => {
+        categoriesData.forEach((category: any) => {
           if (category.children && category.children.length > 0) {
             initCollapsed.add(category.id);
           }
         });
         setCollapsedCategories(initCollapsed);
+      } else {
+        console.error('获取分类失败，状态码:', response.status);
       }
     } catch (error) {
       console.error('获取分类失败:', error);
@@ -279,6 +266,31 @@ export default function PageSettingsPage() {
     }
   };
 
+  // 认证检查
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">正在验证身份...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">请先登录管理员账户</p>
+          <Button onClick={() => window.location.href = '/admin/login'}>
+            前往登录
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       
@@ -317,8 +329,17 @@ export default function PageSettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label className="block text-sm font-medium mb-2">选择分类</label>
+                {/* 调试信息 */}
+                <div className="text-xs text-gray-500 mb-2">
+                  分类数量: {categories.length} | 认证状态: {isAuthenticated ? '已认证' : '未认证'}
+                </div>
                 <div className="max-h-96 overflow-y-auto border rounded p-3 space-y-2">
-                  {categories.map((category) => {
+                  {categories.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500">
+                      暂无分类数据，请检查数据库连接或刷新页面
+                    </div>
+                  ) : (
+                    categories.map((category) => {
                     const isCollapsed = collapsedCategories.has(category.id);
                     const hasChildren = category.children && category.children.length > 0;
                     
@@ -396,7 +417,8 @@ export default function PageSettingsPage() {
                         )}
                       </div>
                     );
-                  })}
+                  }))
+                  }
                 </div>
               </div>
               

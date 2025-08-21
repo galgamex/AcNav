@@ -10,28 +10,28 @@ interface CategorySectionProps {
 }
 
 export function CategorySection({ category, activeSubCategoryId, onTabChange }: CategorySectionProps) {
+  // 过滤出有网站的子分类
+  const validSubCategories = category.children ? category.children.filter(
+    (subCategory) => subCategory.websites && subCategory.websites.length > 0
+  ) : [];
+  
+  // 使用第一个有效子分类作为默认选中
+  const [activeTabId, setActiveTabId] = useState(activeSubCategoryId || (validSubCategories[0]?.id || 0));
+  const activeSubCategory = validSubCategories.find(sub => sub.id === activeTabId) || validSubCategories[0];
+  
+  // 当外部传入的activeSubCategoryId变化时，更新内部状态
+  useEffect(() => {
+    if (activeSubCategoryId && validSubCategories.some(sub => sub.id === activeSubCategoryId)) {
+      setActiveTabId(activeSubCategoryId);
+    }
+  }, [activeSubCategoryId, validSubCategories]);
+  
   // 如果是父分类且有子分类，展示子分类（Tab选项卡形式）
   if (category.children && category.children.length > 0) {
-    // 过滤出有网站的子分类
-    const validSubCategories = category.children.filter(
-      (subCategory) => subCategory.websites && subCategory.websites.length > 0
-    );
-    
     // 如果没有有效的子分类，返回null
     if (validSubCategories.length === 0) {
       return null;
     }
-    
-    // 使用第一个有效子分类作为默认选中
-    const [activeTabId, setActiveTabId] = useState(activeSubCategoryId || validSubCategories[0].id);
-    const activeSubCategory = validSubCategories.find(sub => sub.id === activeTabId) || validSubCategories[0];
-    
-    // 当外部传入的activeSubCategoryId变化时，更新内部状态
-    useEffect(() => {
-      if (activeSubCategoryId && validSubCategories.some(sub => sub.id === activeSubCategoryId)) {
-        setActiveTabId(activeSubCategoryId);
-      }
-    }, [activeSubCategoryId, validSubCategories]);
     
     // Tab切换处理函数
     const handleTabChange = (subCategoryId: number) => {

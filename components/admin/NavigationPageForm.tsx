@@ -303,7 +303,9 @@ export function NavigationPageForm({ navigationPage, onSuccess }: NavigationPage
                     <div className="flex items-center space-x-2">
                       {hasChildren && (
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             const newCollapsed = new Set(collapsedCategories);
                             if (isCollapsed) {
                               newCollapsed.delete(category.id);

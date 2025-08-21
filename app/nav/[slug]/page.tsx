@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { NavigationPageLayout } from '@/components/NavigationPageLayout';
 
 interface NavigationPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 interface NavigationPageData {

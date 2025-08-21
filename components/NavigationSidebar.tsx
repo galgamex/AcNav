@@ -34,10 +34,13 @@ function buildHierarchicalSidebarCategories(categories: any[], selectedCategoryI
     const isSelected = selectedCategoryIds.includes(category.id);
     
     // 递归处理子分类
-    const children = category.children ? buildHierarchicalSidebarCategories(category.children, selectedCategoryIds) : [];
+    let children: SidebarCategory[] = [];
+    if (category.children) {
+      children = buildHierarchicalSidebarCategories(category.children, selectedCategoryIds);
+    }
     
-    // 如果当前分类被选中或有被选中的子分类，则包含在结果中
-    if (isSelected || children.length > 0) {
+    // 只有当前分类被明确选中时，才包含在结果中
+    if (isSelected) {
       result.push({
         id: category.id.toString(),
         name: category.name,
@@ -48,6 +51,9 @@ function buildHierarchicalSidebarCategories(categories: any[], selectedCategoryI
         icon: category.icon,
         iconUrl: category.iconUrl
       });
+    } else if (children.length > 0) {
+      // 如果当前分类未被选中，但有被选中的子分类，则只包含子分类
+      result.push(...children);
     }
   });
   
@@ -68,39 +74,44 @@ export function NavigationSidebar({
     const processCategories = async () => {
       try {
         setLoading(true);
-        
         if (!sidebarCategories || sidebarCategories.length === 0) {
           setProcessedCategories([]);
           setLoading(false);
           return;
         }
 
-        // 获取所有分类数据来构建完整的层级结构
+        // 获取所有分类数据
         const categoriesResponse = await fetch('/api/categories');
         const categoriesData = await categoriesResponse.json();
+        
+        // API返回包含categories和hierarchical字段的对象
         const allCategories = categoriesData.categories || [];
         
         // 构建分类映射
         const categoryMap = new Map();
-        allCategories.forEach((cat: any) => {
-          categoryMap.set(cat.id, { ...cat, children: [] });
+        allCategories.forEach((category: any) => {
+          categoryMap.set(category.id, category);
         });
         
         // 构建层级结构
         const rootCategories: any[] = [];
-        allCategories.forEach((cat: any) => {
-          if (cat.parentId) {
-            const parent = categoryMap.get(cat.parentId);
-            if (parent) {
-              parent.children.push(categoryMap.get(cat.id));
-            }
+        const childrenMap = new Map();
+        
+        allCategories.forEach((category: any) => {
+          if (!category.parentId) {
+            rootCategories.push(category);
           } else {
-            rootCategories.push(categoryMap.get(cat.id));
+            if (!childrenMap.has(category.parentId)) {
+              childrenMap.set(category.parentId, []);
+            }
+            childrenMap.get(category.parentId).push(category);
           }
         });
         
         // 将传入的分类ID转换为层级结构
         const selectedCategoryIds = sidebarCategories.map(cat => cat.id);
+        
+        // 只显示用户明确选择的分类，不自动添加父分类
         const hierarchicalCategories = buildHierarchicalSidebarCategories(rootCategories, selectedCategoryIds);
         
         setProcessedCategories(hierarchicalCategories);

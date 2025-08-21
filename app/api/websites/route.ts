@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 自动获取网站信息
-    let websiteData = { ...validatedData };
+    const websiteData = { ...validatedData };
     
     try {
       const websiteInfo = await fetchWebsiteInfo(validatedData.url);

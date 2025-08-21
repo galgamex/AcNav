@@ -41,8 +41,27 @@ function buildHierarchicalSidebarCategories(categories: any[], selectedCategoryI
     // 检查当前分类是否被选中
     const isSelected = selectedCategoryIds.includes(category.id);
     
-    // 递归处理子分类
-    const children = category.children ? buildHierarchicalSidebarCategories(category.children, selectedCategoryIds) : [];
+    // 如果当前分类被选中，包含所有子分类
+    let children: SidebarCategory[] = [];
+    if (isSelected && category.children) {
+      // 如果父分类被选中，显示所有子分类
+      const convertToSidebarFormat = (cats: any[]): SidebarCategory[] => {
+        return cats.map((cat: any) => ({
+          id: cat.id.toString(),
+          name: cat.name,
+          categoryId: cat.id,
+          isCustom: false,
+          parentId: cat.parentId,
+          children: cat.children ? convertToSidebarFormat(cat.children) : [],
+          icon: cat.icon,
+          iconUrl: cat.iconUrl
+        }));
+      };
+      children = convertToSidebarFormat(category.children);
+    } else if (category.children) {
+      // 如果父分类未被选中，递归检查子分类
+      children = buildHierarchicalSidebarCategories(category.children, selectedCategoryIds);
+    }
     
     // 如果当前分类被选中或有被选中的子分类，则包含在结果中
     if (isSelected || children.length > 0) {
@@ -84,21 +103,25 @@ export function Sidebar({ isCollapsed = false }: SidebarProps) {
         // 获取所有分类数据来构建层级结构
         const categoriesResponse = await fetch('/api/categories');
         const categoriesData = await categoriesResponse.json();
-        const categories = categoriesData.categories || [];
+        // API直接返回分类数组
+        const allCategories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || []);
+        // 在客户端构建层级结构
+        const categories = allCategories.filter((cat: any) => !cat.parentId);
         
         // 构建分类映射
         const categoryMap = new Map();
-        categories.forEach((cat: any) => {
+        allCategories.forEach((cat: any) => {
           categoryMap.set(cat.id, { ...cat, children: [] });
         });
         
         // 构建层级结构
         const rootCategories: any[] = [];
-        categories.forEach((cat: any) => {
+        allCategories.forEach((cat: any) => {
+          const category = categoryMap.get(cat.id);
           if (cat.parentId) {
             const parent = categoryMap.get(cat.parentId);
             if (parent) {
-              parent.children.push(categoryMap.get(cat.id));
+              parent.children.push(category);
             }
           } else {
             rootCategories.push(categoryMap.get(cat.id));
@@ -106,35 +129,31 @@ export function Sidebar({ isCollapsed = false }: SidebarProps) {
         });
         
         // 转换为侧边栏分类格式，只包含在主页设置中选中的分类
-        const selectedCategoryIds = homeData.homeSettings.sidebarCategories.map((sc: any) => sc.categoryId);
+        const selectedCategoryIds = homeData.homeSettings.sidebarCategories
+          .filter((sc: any) => sc.categoryId && sc.name) // 过滤掉无效的分类
+          .map((sc: any) => sc.categoryId);
         
         // 如果没有配置侧边栏分类，显示所有分类
         let hierarchicalCategories;
         if (selectedCategoryIds.length === 0) {
-          // 显示所有分类
-          hierarchicalCategories = rootCategories.map((cat: any) => ({
-            id: cat.id.toString(),
-            name: cat.name,
-            categoryId: cat.id,
-            isCustom: false,
-            parentId: cat.parentId,
-            children: cat.children ? cat.children.map((child: any) => ({
-              id: child.id.toString(),
-              name: child.name,
-              categoryId: child.id,
+          // 递归转换所有分类为侧边栏格式
+          const convertToSidebarFormat = (categories: any[]): SidebarCategory[] => {
+            return categories.map((cat: any) => ({
+              id: cat.id.toString(),
+              name: cat.name,
+              categoryId: cat.id,
               isCustom: false,
-              parentId: child.parentId,
-              children: [],
-              icon: child.icon,
-              iconUrl: child.iconUrl
-            })) : [],
-            icon: cat.icon,
-            iconUrl: cat.iconUrl
-          }));
+              parentId: cat.parentId,
+              children: cat.children ? convertToSidebarFormat(cat.children) : [],
+              icon: cat.icon,
+              iconUrl: cat.iconUrl
+            }));
+          };
+          
+          hierarchicalCategories = convertToSidebarFormat(rootCategories);
         } else {
           hierarchicalCategories = buildHierarchicalSidebarCategories(rootCategories, selectedCategoryIds);
         }
-        
         setHomeSettings({
           ...homeData.homeSettings,
           sidebarCategories: hierarchicalCategories

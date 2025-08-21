@@ -41,7 +41,8 @@ export function MainContent({ showHeader = false }: MainContentProps) {
         ]);
 
         const selectedCategoryIds = homeData.homeSettings?.sidebarCategories?.map((sc: any) => sc.categoryId) || [];
-        const allCategories = categoriesData.categories || [];
+        // API直接返回分类数组
+        const allCategories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || []);
         
         // 构建分类映射
         const categoryMap = new Map();
