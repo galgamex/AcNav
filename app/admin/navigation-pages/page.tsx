@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,7 +77,7 @@ export default function PageSettingsPage() {
   // 分类折叠状态
   const [collapsedCategories, setCollapsedCategories] = useState<Set<number>>(new Set());
 
-  const fetchNavigationPages = async (page = 1, search = '') => {
+  const fetchNavigationPages = useCallback(async (page = 1, search = '') => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -96,9 +96,9 @@ export default function PageSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.limit]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch('/api/categories');
       if (response.ok) {
@@ -124,7 +124,7 @@ export default function PageSettingsPage() {
     } catch (error) {
       console.error('获取分类失败:', error);
     }
-  };
+  }, []);
 
   const addSidebarCategory = (categoryId?: number, customName?: string) => {
     const newCategory = {
@@ -180,7 +180,7 @@ export default function PageSettingsPage() {
   useEffect(() => {
     fetchNavigationPages();
     fetchCategories();
-  }, [searchTerm]);
+  }, [searchTerm, fetchNavigationPages, fetchCategories]);
 
   useEffect(() => {
     // 初始加载时获取主页设置

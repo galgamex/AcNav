@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Calendar, ChevronRight, ExternalLink, Globe, Home, Plus, Star, Tag as TagIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -119,7 +119,7 @@ export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: ext
     fetchWebsite();
     fetchTags();
     fetchAvailableTags();
-  }, [websiteId]);
+  }, [websiteId, onWebsiteUpdate]);
 
   const handleBack = () => {
     if (fromCategory && categoryId) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { UnifiedSidebar } from '@/components/UnifiedSidebar';
 
@@ -63,16 +63,7 @@ export function NavigationPageLayout({
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-
-  // 获取推荐网站和完整分类数据
-  useEffect(() => {
-    if (sidebarCategories && sidebarCategories.length > 0) {
-      fetchRecommendedWebsites();
-      fetchAllCategoriesData();
-    }
-  }, [sidebarCategories]);
-
-  const fetchRecommendedWebsites = async () => {
+  const fetchRecommendedWebsites = useCallback(async () => {
     try {
       // 获取所有推荐网站
       const response = await fetch('/api/recommended');
@@ -93,9 +84,9 @@ export function NavigationPageLayout({
     } catch (error) {
       console.error('获取推荐网站失败:', error);
     }
-  };
+  }, [sidebarCategories]);
 
-  const fetchAllCategoriesData = async () => {
+  const fetchAllCategoriesData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -139,7 +130,7 @@ export function NavigationPageLayout({
     } finally {
       setLoading(false);
     }
-  };
+  }, [sidebarCategories]);
 
   // 处理子分类激活
   const handleSubCategoryActivate = (subCategoryId: number) => {

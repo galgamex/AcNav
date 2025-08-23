@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -67,7 +67,7 @@ export default function SubmissionsPage() {
   const [isReviewing, setIsReviewing] = useState(false);
 
   // 获取申请列表
-  const fetchSubmissions = async (page = 1, status = statusFilter) => {
+  const fetchSubmissions = useCallback(async (page = 1, status = statusFilter) => {
     try {
       setIsLoading(true);
       const params = new URLSearchParams({
@@ -93,11 +93,11 @@ export default function SubmissionsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     fetchSubmissions();
-  }, []);
+  }, [fetchSubmissions]);
 
   // 状态筛选变化
   const handleStatusFilterChange = (status: string) => {

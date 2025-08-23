@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { WebsiteCard } from '@/components/WebsiteCard';
@@ -63,17 +63,7 @@ export default function CategoryDetailPage() {
 
   const categoryId = parseInt(params.id as string);
 
-  useEffect(() => {
-    if (isNaN(categoryId)) {
-      setError('无效的分类ID');
-      setLoading(false);
-      return;
-    }
-
-    fetchCategoryDetail();
-  }, [categoryId]);
-
-  const fetchCategoryDetail = async () => {
+  const fetchCategoryDetail = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/categories/${categoryId}`);
@@ -101,7 +91,17 @@ export default function CategoryDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId, router]);
+
+  useEffect(() => {
+    if (isNaN(categoryId)) {
+      setError('无效的分类ID');
+      setLoading(false);
+      return;
+    }
+
+    fetchCategoryDetail();
+  }, [categoryId, fetchCategoryDetail]);
 
   const getCurrentWebsites = (): Website[] => {
     if (!category) return [];

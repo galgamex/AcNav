@@ -3,6 +3,7 @@ import { getCurrentAdmin } from '@/lib/auth-simple';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { cookies } from 'next/headers';
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, '请输入原密码'),
