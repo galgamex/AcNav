@@ -57,7 +57,7 @@ export async function GET() {
     });
 
     // 在内存中构建层级结构数据，避免额外的数据库查询
-    const topLevelCategories = allCategories.filter(cat => !cat.parentId);
+    const topLevelCategories = allCategories.filter((cat: { parentId: number | null }) => !cat.parentId);
 
     const result = {
       categories: allCategories, // 扁平化的所有分类
