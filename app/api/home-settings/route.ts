@@ -20,7 +20,8 @@ export async function GET() {
       welcomeMessage: settings.find(s => s.key === 'home_welcome_message')?.value || '欢迎使用 AcNav 导航站',
       showRecommended: settings.find(s => s.key === 'home_show_recommended')?.value === 'true',
       sidebarCategories: JSON.parse(settings.find(s => s.key === 'home_sidebar_categories')?.value || '[]'),
-      customLinks: JSON.parse(settings.find(s => s.key === 'home_custom_links')?.value || '[]')
+      customLinks: JSON.parse(settings.find(s => s.key === 'home_custom_links')?.value || '[]'),
+
     };
 
     return NextResponse.json({ homeSettings });

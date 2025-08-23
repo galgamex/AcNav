@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, ExternalLink, Calendar, Tag, Star, Globe, Plus, X, ChevronRight, Home } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronRight, ExternalLink, Globe, Home, Plus, Star, Tag as TagIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Category } from '@/types';
 import Link from 'next/link';
 import WebsiteVisitsChart from '@/components/WebsiteVisitsChart';
@@ -38,13 +41,16 @@ interface Tag {
 
 interface WebsiteDetailContentProps {
   categories: Category[];
+  onWebsiteUpdate: (website: Website) => void;
+  loading: boolean;
 }
 
-export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) {
+export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: externalLoading }: WebsiteDetailContentProps) {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [website, setWebsite] = useState<Website | null>(null);
+  const [websiteBasicInfo, setWebsiteBasicInfo] = useState<{ categoryId: number; name: string | null } | null>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +79,11 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
         }
         const data = await response.json();
         setWebsite(data);
+        setWebsiteBasicInfo({
+          categoryId: data.categoryId,
+          name: data.name
+        });
+        onWebsiteUpdate(data);
       } catch (error) {
         console.error('获取网站详情失败:', error);
         setError(error instanceof Error ? error.message : '获取网站详情失败');
@@ -244,10 +255,26 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
     });
   };
 
-  const getBreadcrumbs = () => {
-    const breadcrumbs = [{ name: '首页', href: '/' }];
+  // 获取面包屑导航
+  function getBreadcrumbs() {
+    const fromCategory = searchParams?.get('from') === 'category';
+    const categoryId = searchParams?.get('categoryId');
+    const fromNavPage = searchParams?.get('fromNavPage');
     
-    if (fromCategory && categoryId && website) {
+    // 根据来源确定首页链接
+    let homeLink = '/';
+    let homeName = '首页';
+    
+    if (fromNavPage) {
+      // 如果是从导航页进入的，首页链接指向对应的导航页
+      homeLink = `/nav/${fromNavPage}`;
+      homeName = '导航页';
+    }
+    
+    const breadcrumbs = [{ name: homeName, href: homeLink }];
+    
+    // 优先从URL参数获取分类信息（如果是从分类页面跳转过来的）
+    if (fromCategory && categoryId && Array.isArray(categories)) {
       // 找到当前分类
       const currentCategory = categories.find(cat => cat.id === parseInt(categoryId));
       if (currentCategory) {
@@ -267,8 +294,9 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
           href: `/category/${currentCategory.id}`
         });
       }
-    } else if (website) {
-      // 从网站的分类信息构建面包屑
+    } 
+    // 如果网站数据已加载，从网站的分类信息构建面包屑
+    else if (website && Array.isArray(categories)) {
       const websiteCategory = categories.find(cat => cat.id === website.categoryId);
       if (websiteCategory) {
         // 如果是子分类，先添加父分类
@@ -288,64 +316,58 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
         });
       }
     }
+    // 如果既没有URL参数也没有网站数据，但分类数据已加载，尝试从网站基本信息推断分类
+    else if (websiteBasicInfo && Array.isArray(categories)) {
+      const websiteCategory = categories.find(cat => cat.id === websiteBasicInfo.categoryId);
+      if (websiteCategory) {
+        // 如果是子分类，先添加父分类
+        if (websiteCategory.parentId) {
+          const parentCategory = categories.find(cat => cat.id === websiteCategory.parentId);
+          if (parentCategory) {
+            breadcrumbs.push({
+              name: parentCategory.name,
+              href: `/category/${parentCategory.id}`
+            });
+          }
+        }
+        
+        breadcrumbs.push({
+          name: websiteCategory.name,
+          href: `/category/${websiteCategory.id}`
+        });
+      }
+    }
     
+    // 添加网站名称
     if (website) {
       breadcrumbs.push({
         name: website.name || '未命名网站',
         href: '#'
       });
+    } else if (websiteBasicInfo) {
+      breadcrumbs.push({
+        name: websiteBasicInfo.name || '未命名网站',
+        href: '#'
+      });
+    } else {
+      // 如果网站数据还在加载中，显示占位符
+      breadcrumbs.push({
+        name: '加载中...',
+        href: '#'
+      });
     }
     
     return breadcrumbs;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
-        </div>
-      </div>
-    );
   }
-
-  if (error || !website) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">
-            <Globe />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {error || '网站不存在'}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            请检查网址是否正确，或返回首页浏览其他内容
-          </p>
-          <Button onClick={handleBack} className="mr-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
-          </Button>
-          <Button variant="outline" onClick={() => router.push('/')}>
-            <Home className="w-4 h-4 mr-2" />
-            回到首页
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-[1200px]">
+    <div className="px-6 py-4">
       {/* 面包屑导航 */}
       <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-        {breadcrumbs.map((crumb, index) => (
+        {getBreadcrumbs().map((crumb, index) => (
           <div key={index} className="flex items-center">
             {index > 0 && <ChevronRight className="w-4 h-4 mx-2" />}
-            {index === breadcrumbs.length - 1 ? (
+            {index === getBreadcrumbs().length - 1 ? (
               <span className="text-gray-900 dark:text-white font-medium">{crumb.name}</span>
             ) : (
               <Link 
@@ -359,10 +381,39 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
         ))}
       </nav>
 
-      
-
-      {/* 网站详情卡片 */}
-      <Card className="mb-6 bg-transparent border-transparent shadow-none">
+      {(externalLoading || loading) ? (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">加载中...</p>
+          </div>
+        </div>
+      ) : (error || !website) ? (
+        <div className="flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">
+              <Globe />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              {error || '网站不存在'}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              请检查网址是否正确，或返回首页浏览其他内容
+            </p>
+            <Button onClick={handleBack} className="mr-4">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回
+            </Button>
+            <Button variant="outline" onClick={() => router.push('/')}>
+              <Home className="w-4 h-4 mr-2" />
+              回到首页
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* 网站详情卡片 */}
+          <Card className="mb-6 bg-transparent border-transparent shadow-none">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
@@ -437,7 +488,7 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
-              <Tag className="w-5 h-5" />
+              <TagIcon className="w-5 h-5" />
               <span>标签</span>
             </CardTitle>
             <div className="flex items-center space-x-2">
@@ -598,8 +649,10 @@ export function WebsiteDetailContent({ categories }: WebsiteDetailContentProps) 
         </CardContent>
       </Card>
 
-      {/* 访问统计 */}
-      <WebsiteVisitsChart websiteId={parseInt(websiteId)} days={30} />
+          {/* 访问统计 */}
+          <WebsiteVisitsChart websiteId={parseInt(websiteId)} days={30} />
+        </>
+      )}
     </div>
   );
 }

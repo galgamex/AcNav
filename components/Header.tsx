@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, Settings, Menu, Plus } from 'lucide-react';
+import { Moon, Sun, Settings, Menu, Plus, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useGlobalState } from '@/contexts/GlobalStateContext';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -12,34 +12,8 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollapsed = false }: HeaderProps) {
-  const [isDark, setIsDark] = useState(false);
-
-  // 初始化主题
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-    
-    setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-
-
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  const { state, actions } = useGlobalState();
+  const { isDark, isLoading } = state;
 
   return (
     <header 
@@ -69,15 +43,8 @@ export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollaps
             <Menu className="h-5 w-5" />
           </Button>
           
-          {/* 顶部导航内容可在后台自定义 */}
-          <div className="hidden lg:flex items-center">
-            <span className="text-sm text-gray-500 dark:text-gray-400 px-3 py-2">
-              顶部导航内容可在后台自定义
-            </span>
-          </div>
-        </div>
-        
 
+        </div>
         
         <div className="flex items-center space-x-1 md:space-x-2">
           <Link href="/admin">
@@ -100,7 +67,7 @@ export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollaps
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={toggleTheme}
+            onClick={actions.toggleTheme}
             className="h-8 w-8 md:h-10 md:w-10"
           >
             {isDark ? (

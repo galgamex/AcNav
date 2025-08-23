@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
-import { NavigationSidebar } from '@/components/NavigationSidebar';
-import { NavigationMobileDrawer } from '@/components/NavigationMobileDrawer';
+import { UnifiedSidebar } from '@/components/UnifiedSidebar';
+
 import { SearchBar } from '@/components/SearchBar';
 import { NavigationRecommendedSection } from '@/components/NavigationRecommendedSection';
 import { CategorySection } from '@/components/CategorySection';
+import { useGlobalState } from '@/contexts/GlobalStateContext';
+import { GlobalLayout } from '@/components/GlobalLayout';
 
 interface Category {
   id: number;
@@ -54,13 +56,13 @@ export function NavigationPageLayout({
   sidebarCategories,
   headerCategories,
 }: NavigationPageLayoutProps) {
+  const { state, actions } = useGlobalState();
   const [searchQuery, setSearchQuery] = useState('');
   const [recommendedWebsites, setRecommendedWebsites] = useState<Website[]>([]);
   const [allCategoriesData, setAllCategoriesData] = useState<any[]>([]);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
 
   // 获取推荐网站和完整分类数据
   useEffect(() => {
@@ -176,85 +178,67 @@ export function NavigationPageLayout({
     // 这里可以实现搜索逻辑
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
+
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header 
-        onToggleSidebar={toggleSidebar}
-        onToggleMobileDrawer={() => setIsMobileDrawerOpen(true)}
-        isSidebarCollapsed={isSidebarCollapsed}
-      />
-      
-      <div className="flex">
-        {/* 桌面端侧边栏 */}
-        <div className="hidden md:block">
-          <NavigationSidebar 
-            isCollapsed={isSidebarCollapsed}
-            sidebarCategories={sidebarCategories}
-          />
-        </div>
-        
-        {/* 主内容区域 */}
-        <main className={`flex-1 ml-0 pt-12 md:pt-16 transition-all duration-300 ${
-          isSidebarCollapsed ? 'md:ml-16' : 'md:ml-56'
-        }`}>
-          <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-            <div className="mx-auto" style={{maxWidth: '1900px'}}>
-              <div className="space-y-8">
-                <SearchBar />
-                
-                {loading ? (
-                  <div className="text-center py-20">
-                    <div className="text-gray-500 dark:text-gray-400">
-                      <p className="text-lg">加载中...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* 推荐区域 */}
-                    {sidebarCategories.length > 0 && recommendedWebsites.length > 0 && (
-                      <NavigationRecommendedSection websites={recommendedWebsites} />
-                    )}
-                    
-                    {/* 分类区块显示 */}
-                    <div className="space-y-12">
-                      {allCategoriesData.length > 0 ? (
-                        allCategoriesData.map((category) => (
-                          <div key={category.id} id={`category-${category.id}`} className="scroll-mt-20">
-                            <CategorySection 
-                              category={category} 
-                              activeSubCategoryId={activeSubCategoryId || undefined}
-                              onTabChange={handleSubCategoryActivate}
-                            />
-                          </div>
-                        ))
-                      ) : (
-                        !loading && (
-                          <div className="text-center py-20">
-                            <div className="text-gray-500 dark:text-gray-400">
-                              <h2 className="text-2xl font-semibold mb-2">暂无分类配置</h2>
-                              <p className="text-lg">请在后台为此导航页配置分类</p>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </>
-                )}
+    <GlobalLayout 
+      sidebarMode="navigation"
+      sidebarProps={{
+        sidebarCategories: sidebarCategories
+      }}
+    >
+      <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="mx-auto" style={{maxWidth: '1900px'}}>
+          <div className="space-y-8">
+            <SearchBar />
+            
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="text-gray-500 dark:text-gray-400">
+                  <p className="text-lg">加载中...</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* 推荐区域 */}
+                {sidebarCategories.length > 0 && recommendedWebsites.length > 0 && (
+                  <NavigationRecommendedSection 
+                    websites={recommendedWebsites} 
+                    fromNavPage={navigationPage.slug}
+                  />
+                )}
+                
+                {/* 分类区块显示 */}
+                <div className="space-y-12">
+                  {allCategoriesData.length > 0 ? (
+                    allCategoriesData.map((category) => (
+                      <div key={category.id} id={`category-${category.id}`} className="scroll-mt-20">
+                        <CategorySection 
+                          category={category} 
+                          activeSubCategoryId={activeSubCategoryId || undefined}
+                          onTabChange={handleSubCategoryActivate}
+                          fromNavPage={navigationPage.slug}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    !loading && (
+                      <div className="text-center py-20">
+                        <div className="text-gray-500 dark:text-gray-400">
+                          <h2 className="text-2xl font-semibold mb-2">暂无分类配置</h2>
+                          <p className="text-lg">请在后台为此导航页配置分类</p>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </>
+            )}
           </div>
-        </main>
+        </div>
       </div>
       
-      <NavigationMobileDrawer
-        isOpen={isMobileDrawerOpen}
-        onClose={() => setIsMobileDrawerOpen(false)}
-        sidebarCategories={sidebarCategories}
-      />
-    </div>
+
+    </GlobalLayout>
   );
 }

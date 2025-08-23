@@ -3,7 +3,9 @@
 import { useEffect } from 'react';
 import { X, ChevronRight, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CategoryIcon } from './CategoryIcon';
+import { Logo } from './Logo';
 
 interface NavigationMobileDrawerProps {
   isOpen: boolean;
@@ -60,6 +62,7 @@ export function NavigationMobileDrawer({
   onClose, 
   sidebarCategories
 }: NavigationMobileDrawerProps) {
+  const router = useRouter();
   const [processedCategories, setProcessedCategories] = useState<SidebarCategory[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -143,25 +146,12 @@ export function NavigationMobileDrawer({
       // 判断是否为子分类（有parentId的为子分类）
       const isSubCategory = category.parentId !== undefined && category.parentId !== null;
       
-      // 发送自定义事件通知NavigationPageLayout组件
-      const event = new CustomEvent('sidebarCategoryClick', {
-        detail: {
-          categoryId: category.categoryId,
-          isSubCategory: isSubCategory
-        }
-      });
-      window.dispatchEvent(event);
-      
       if (isSubCategory) {
-        // 如果是子分类，不直接滚动，让NavigationPageLayout处理
-        onClose();
-        return;
-      }
-      
-      // 如果是父分类，滚动到对应分类
-      const categoryElement = document.getElementById(`category-${category.categoryId}`);
-      if (categoryElement) {
-        categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 如果是子分类，导航到父分类的详情页
+        router.push(`/category/${category.parentId}`);
+      } else {
+        // 如果是父分类，导航到分类详情页
+        router.push(`/category/${category.categoryId}`);
       }
     }
     
@@ -181,8 +171,8 @@ export function NavigationMobileDrawer({
             onClick={() => handleCategoryClick(category)}
             className="flex-1 flex items-center py-3 px-4 text-sm rounded-lg text-left transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
           >
-            {/* 分类图标 */}
-            <div className="flex-shrink-0">
+            {/* 分类图标 - 固定位置 */}
+            <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
               <CategoryIcon 
                 icon={category.icon} 
                 iconUrl={category.iconUrl}
@@ -255,16 +245,15 @@ export function NavigationMobileDrawer({
         {/* 头部 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="网站Logo" 
-              className="w-8 h-8 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            <Logo 
               onClick={() => {
                 // 滚动到页面顶部，显示推荐区域
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 onClose();
               }}
-              title="返回推荐区域"
+              showText={false}
+              size="sm"
+              className=""
             />
             <h2 className="ml-3 text-lg font-semibold text-gray-900 dark:text-white">
               导航分类

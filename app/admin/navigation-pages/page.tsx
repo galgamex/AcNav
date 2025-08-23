@@ -71,6 +71,7 @@ export default function PageSettingsPage() {
       url: string;
       description?: string;
     }>,
+
   });
   
   // 分类折叠状态
@@ -173,6 +174,8 @@ export default function PageSettingsPage() {
       customLinks: prev.customLinks.filter(link => link.id !== id)
     }));
   };
+
+
 
   useEffect(() => {
     fetchNavigationPages();
@@ -710,9 +713,11 @@ export default function PageSettingsPage() {
                 </div>
               )}
             </div>
-          )}
+          )})
         </div>
       )}
+
+
     </div>
   );
 }

@@ -42,7 +42,7 @@ export function SearchBar({ onSearchResults, onClear }: SearchBarProps) {
         setIsSearching(false);
       }
     }, 300),
-    [onSearchResults]
+    [onSearchResults, onClear]
   );
 
   useEffect(() => {

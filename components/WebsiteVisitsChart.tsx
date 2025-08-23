@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -49,8 +49,8 @@ interface WebsiteVisitsChartProps {
   days?: number;
 }
 
-// 自定义Tooltip组件
-const CustomTooltip = ({ active, payload, label }: any) => {
+// 自定义Tooltip组件 - 使用useCallback优化
+const CustomTooltip = React.memo(({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -81,47 +81,76 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
-};
+});
 
-export default function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
+CustomTooltip.displayName = 'CustomTooltip';
+
+function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
   const [data, setData] = useState<VisitsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch(`/api/websites/${websiteId}/stats?days=${days}`);
-        const result = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(result.error || '获取数据失败');
-        }
-        
-        if (result.success) {
-          setData(result.data);
-        } else {
-          throw new Error('数据格式错误');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '未知错误');
-      } finally {
-        setLoading(false);
+  // 使用useCallback优化fetchData函数
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/websites/${websiteId}/stats?days=${days}`);
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || '获取数据失败');
       }
-    };
-
-    fetchData();
+      
+      if (result.success) {
+        setData(result.data);
+      } else {
+        throw new Error('数据格式错误');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '未知错误');
+    } finally {
+      setLoading(false);
+    }
   }, [websiteId, days]);
 
-  if (loading) {
+  // 使用useMemo优化图表数据格式化 - 必须在所有条件返回之前调用
+  const chartData = useMemo(() => {
+    if (!data) return [];
+    return data.dailyStats.map(stat => ({
+      ...stat,
+      date: new Date(stat.date).toLocaleDateString('zh-CN', {
+        month: 'short',
+        day: 'numeric'
+      })
+    }));
+  }, [data]);
+
+  // 延迟加载机制 - 避免在页面加载时立即渲染图表
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100); // 延迟100ms后开始加载
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      fetchData();
+    }
+  }, [fetchData, isVisible]);
+
+  if (!isVisible || loading) {
     return (
       <Card className="bg-transparent border-transparent shadow-none">
         <CardHeader>
           <CardTitle>访问统计</CardTitle>
-          <CardDescription>加载中...</CardDescription>
+          <CardDescription>
+            {!isVisible ? '准备加载...' : '加载中...'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80 flex items-center justify-center">
@@ -160,15 +189,6 @@ export default function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisi
     return null;
   }
 
-  // 格式化图表数据
-  const chartData = data.dailyStats.map(stat => ({
-    ...stat,
-    date: new Date(stat.date).toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric'
-    })
-  }));
-
   return (
     <Card className="bg-transparent border-transparent shadow-none">
       <CardHeader>
@@ -198,47 +218,56 @@ export default function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisi
           </div>
         </div>
 
-        {/* 条形图 */}
+        {/* 条形图 - 使用懒加载优化性能 */}
         <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar 
-                dataKey="mobileVisits" 
-                stackId="a" 
-                fill="#3b82f6" 
-                name="移动端访问"
-                radius={[0, 0, 0, 0]}
-              />
-              <Bar 
-                dataKey="desktopVisits" 
-                stackId="a" 
-                fill="#10b981" 
-                name="PC端访问"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar 
+                  dataKey="mobileVisits" 
+                  stackId="a" 
+                  fill="#3b82f6" 
+                  name="移动端访问"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar 
+                  dataKey="desktopVisits" 
+                  stackId="a" 
+                  fill="#10b981" 
+                  name="PC端访问"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">
+              暂无访问数据
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
+
+// 使用React.memo优化组件性能
+export default React.memo(WebsiteVisitsChart);

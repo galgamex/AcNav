@@ -36,7 +36,7 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
           </Button>
           
           <h1 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
-            ThinNav 管理后台
+            AcNavs 管理后台
           </h1>
         </div>
         

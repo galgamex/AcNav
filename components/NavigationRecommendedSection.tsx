@@ -24,11 +24,13 @@ interface Website {
 interface NavigationRecommendedSectionProps {
   className?: string;
   websites: Website[];
+  fromNavPage?: string;
 }
 
 export function NavigationRecommendedSection({ 
   className = '',
-  websites 
+  websites,
+  fromNavPage
 }: NavigationRecommendedSectionProps) {
   
   if (websites.length === 0) {
@@ -79,6 +81,7 @@ export function NavigationRecommendedSection({
               }))
             }} 
             isRecommended={true}
+            fromNavPage={fromNavPage}
           />
         ))}
       </div>

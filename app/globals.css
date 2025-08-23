@@ -60,14 +60,42 @@ body,
   width: 100%;
 }
 
+/* 防止暗黑模式闪白的基础样式 */
+html {
+  background-color: rgba(245, 245, 245, 1);
+  transition: background-color 0.3s ease;
+}
+
+html.dark {
+  background-color: rgb(17, 24, 39);
+}
+
+/* 使用CSS变量来处理主题切换，避免闪白 */
+:root {
+  --bg-color: rgba(245, 245, 245, 1);
+  --text-color: var(--text-color-primary);
+  --text-color-secondary: rgba(0, 0, 0, 0.65);
+  --card-bg: rgba(255, 255, 255, 1);
+  --card-shadow: 0px 4px 4px rgba(240, 244, 249, 0.1);
+}
+
+.dark {
+  --bg-color: rgb(17, 24, 39);
+  --text-color: rgb(229, 231, 235);
+  --text-color-secondary: rgb(156, 163, 175);
+  --card-bg: rgb(31, 41, 55);
+  --card-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+}
+
 body {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
-  color: var(--text-color-primary);
-  background-color: rgba(245, 245, 245, 1);
+  color: var(--text-color);
+  background-color: var(--bg-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 平滑滚动 */
@@ -261,10 +289,11 @@ html {
 .category-name {
   margin-top: 0;
   margin-bottom: 16px;
-  color: var(--text-color-primary);
+  color: var(--text-color);
   position: relative;
   display: inline-block;
   padding-bottom: 8px;
+  transition: color 0.3s ease;
 }
 
 .category-name::after {
@@ -293,13 +322,13 @@ html {
   height: 110px;
   opacity: 0;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0px 4px 4px rgba(240, 244, 249, 0.1);
+  background: var(--card-bg, rgba(255, 255, 255, 1));
+  box-shadow: var(--card-shadow, 0px 4px 4px rgba(240, 244, 249, 0.1));
   display: flex;
   cursor: pointer;
   position: relative;
   animation-fill-mode: forwards;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .website-card:hover {
@@ -322,7 +351,8 @@ html {
 
 .website-name {
   margin: 0 0 6px 0;
-  color: var(--text-color-primary);
+  color: var(--text-color);
+  transition: color 0.3s ease;
 }
 
 .website-description {
@@ -335,6 +365,7 @@ html {
   text-overflow: ellipsis;
   max-height: 3em;
   line-height: var(--line-height-normal);
+  transition: color 0.3s ease;
 }
 
 /* 底部版权信息 */

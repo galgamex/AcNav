@@ -61,7 +61,7 @@ export async function GET(
     startDate.setDate(startDate.getDate() - days + 1);
     startDate.setHours(0, 0, 0, 0);
 
-    // 获取访问统计数据
+    // 获取访问统计数据 - 优化查询
     const visits = await prisma.websiteVisit.findMany({
       where: {
         websiteId: websiteId,
@@ -69,6 +69,11 @@ export async function GET(
           gte: startDate,
           lte: endDate
         }
+      },
+      select: {
+        date: true,
+        mobileVisits: true,
+        desktopVisits: true
       },
       orderBy: {
         date: 'asc'

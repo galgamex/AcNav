@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
           管理概览
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          欢迎使用 ThinNav 管理后台
+          欢迎使用 AcNavs 管理后台
         </p>
       </div>
 

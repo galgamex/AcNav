@@ -11,6 +11,86 @@ const updateCategorySchema = z.object({
   order: z.number().int().min(0).optional(),
 });
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const categoryId = parseInt(id);
+    if (isNaN(categoryId)) {
+      return NextResponse.json({ error: '无效的分类ID' }, { status: 400 });
+    }
+
+    // 尝试从缓存获取
+    const cacheKey = CacheService.keys.categoryWebsites(categoryId);
+    const cachedData = await cache.get(cacheKey);
+    
+    if (cachedData) {
+      return NextResponse.json(cachedData);
+    }
+
+    // 获取分类详情，包括子分类和网站
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      include: {
+        websites: {
+          orderBy: { order: 'asc' },
+        },
+        children: {
+          orderBy: { order: 'asc' },
+          include: {
+            websites: {
+              orderBy: { order: 'asc' },
+            },
+            _count: {
+              select: {
+                websites: true,
+              },
+            },
+          },
+        },
+        parent: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+            iconUrl: true,
+          },
+        },
+        _count: {
+          select: {
+            websites: true,
+          },
+        },
+      },
+    });
+
+    if (!category) {
+      return NextResponse.json({ error: '分类不存在' }, { status: 404 });
+    }
+
+    // 只有父分类才有详情页，子分类重定向到父分类
+    if (category.parentId) {
+      return NextResponse.json({ 
+        error: '子分类没有独立详情页',
+        parentId: category.parentId 
+      }, { status: 400 });
+    }
+
+    // 缓存结果
+    await cache.set(cacheKey, category, 1800); // 30分钟缓存
+
+    return NextResponse.json(category);
+  } catch (error) {
+    console.error('获取分类详情失败:', error);
+    return NextResponse.json(
+      { error: '获取分类详情失败' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -1,20 +1,86 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Home, ChevronRight, ChevronDown, ArrowLeft, List, Globe } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronRight, ChevronDown, ArrowLeft, Home, List, Globe } from 'lucide-react';
 import { CategoryIcon } from './CategoryIcon';
-import { useGlobalState } from '@/contexts/GlobalStateContext';
+import { Logo } from './Logo';
 import { Category } from '@/types';
+import { useGlobalState } from '@/contexts/GlobalStateContext';
 
 // 侧边栏模式类型
 type SidebarMode = 'home' | 'navigation' | 'category' | 'website';
 
-interface MobileDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  mode?: SidebarMode;
+// 通用分类接口
+interface SidebarCategory {
+  id: string;
+  name: string;
+  categoryId?: number;
+  isCustom: boolean;
+  parentId?: number | null;
+  children?: SidebarCategory[];
+  icon?: string;
+  iconUrl?: string;
+  websiteCount?: number;
+}
+
+// 自定义链接接口
+interface CustomLink {
+  id: string;
+  name: string;
+  url: string;
+  description?: string;
+}
+
+// 主页设置接口
+interface HomeSettings {
+  sidebarCategories: SidebarCategory[];
+  customLinks: CustomLink[];
+}
+
+// 网站接口
+interface Website {
+  id: number;
+  name: string | null;
+  url: string;
+  iconUrl: string | null;
+  description: string | null;
+  order: number;
+  isRecommended: boolean;
+  categoryId: number;
+  createdAt: string;
+  updatedAt: string;
+  category: {
+    id: number;
+    name: string;
+    iconUrl: string | null;
+  };
+}
+
+// 分类详情接口
+interface CategoryDetail {
+  id: number;
+  name: string;
+  icon?: string;
+  iconUrl?: string;
+  children: Array<{
+    id: number;
+    name: string;
+    icon?: string;
+    iconUrl?: string;
+    _count: {
+      websites: number;
+    };
+  }>;
+  _count: {
+    websites: number;
+  };
+}
+
+// 统一侧边栏属性接口
+interface UnifiedSidebarProps {
+  isCollapsed?: boolean;
+  mode: SidebarMode;
   
   // 导航页模式专用
   sidebarCategories?: Array<{
@@ -25,69 +91,13 @@ interface MobileDrawerProps {
   }>;
   
   // 分类详情模式专用
-  category?: {
-    id: number;
-    name: string;
-    icon?: string;
-    iconUrl?: string;
-    children: Array<{
-      id: number;
-      name: string;
-      icon?: string;
-      iconUrl?: string;
-      _count: {
-        websites: number;
-      };
-    }>;
-    _count: {
-      websites: number;
-    };
-  };
+  category?: CategoryDetail;
   activeSubCategory?: number | null;
   onSubCategoryChange?: (subCategoryId: number | null) => void;
   
   // 网站详情模式专用
-  website?: {
-    id: number;
-    name: string | null;
-    url: string;
-    iconUrl: string | null;
-    description: string | null;
-    order: number;
-    isRecommended: boolean;
-    categoryId: number;
-    createdAt: string;
-    updatedAt: string;
-    category: {
-      id: number;
-      name: string;
-      iconUrl: string | null;
-    };
-  };
+  website?: Website;
   categories?: Category[];
-}
-
-interface SidebarCategory {
-  id: string;
-  name: string;
-  categoryId?: number;
-  isCustom: boolean;
-  parentId?: number | null;
-  children?: SidebarCategory[];
-  icon?: string | null;
-  iconUrl?: string | null;
-}
-
-interface CustomLink {
-  id: string;
-  name: string;
-  url: string;
-  description?: string;
-}
-
-interface HomeSettings {
-  sidebarCategories: SidebarCategory[];
-  customLinks: CustomLink[];
 }
 
 // 构建层级侧边栏分类的辅助函数
@@ -173,17 +183,16 @@ function buildNavigationHierarchicalCategories(categories: any[], selectedCatego
   return result;
 }
 
-export function MobileDrawer({ 
-  isOpen, 
-  onClose, 
-  mode = 'home',
+export function UnifiedSidebar({
+  isCollapsed = false,
+  mode,
   sidebarCategories,
   category,
   activeSubCategory,
   onSubCategoryChange,
   website,
   categories
-}: MobileDrawerProps) {
+}: UnifiedSidebarProps) {
   const router = useRouter();
   const { state } = useGlobalState();
   const [homeSettings, setHomeSettings] = useState<HomeSettings>({
@@ -403,19 +412,6 @@ export function MobileDrawer({
     }
   }, [mode, sidebarCategories, fetchHomeSettings, processNavigationCategories]);
 
-  // 阻止背景滚动
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   // 返回首页的处理函数
   const handleGoHome = () => {
     if (mode === 'home' || mode === 'navigation') {
@@ -426,13 +422,11 @@ export function MobileDrawer({
     } else {
       router.push('/');
     }
-    onClose();
   };
 
   // 返回网站首页的处理函数
   const handleGoToMainHome = () => {
     router.push('/');
-    onClose();
   };
 
   // 处理分类点击
@@ -453,7 +447,6 @@ export function MobileDrawer({
         
         if (isSubCategory) {
           // 如果是子分类，不直接滚动，让MainContent处理
-          onClose();
           return;
         }
         
@@ -475,7 +468,19 @@ export function MobileDrawer({
         }
       }
     }
-    onClose();
+  };
+
+  // 处理分类按钮点击（包括展开/收缩和导航）
+  const handleCategoryButtonClick = (category: SidebarCategory) => {
+    const hasChildren = category.children && category.children.length > 0;
+    
+    if (hasChildren && category.categoryId) {
+      // 如果有子分类，先处理展开/收缩
+      toggleCategoryCollapse(category.categoryId);
+    } else {
+      // 如果没有子分类，执行原有的导航逻辑
+      handleCategoryClick(category);
+    }
   };
 
   // 处理自定义链接点击
@@ -485,7 +490,6 @@ export function MobileDrawer({
     } else {
       router.push(link.url);
     }
-    onClose();
   };
 
   // 切换分类折叠状态
@@ -502,7 +506,6 @@ export function MobileDrawer({
   // 处理返回上一页（分类详情模式）
   const handleGoBack = () => {
     router.back();
-    onClose();
   };
 
   // 处理子分类点击（分类详情模式）
@@ -510,7 +513,6 @@ export function MobileDrawer({
     if (onSubCategoryChange) {
       onSubCategoryChange(subCategoryId);
     }
-    onClose();
   };
 
   // 处理返回所属分类列表（网站详情模式）
@@ -518,7 +520,6 @@ export function MobileDrawer({
     if (website) {
       router.push(`/category/${website.categoryId}`);
     }
-    onClose();
   };
 
   // 处理返回导航页（网站详情模式）
@@ -537,7 +538,6 @@ export function MobileDrawer({
       if (!Array.isArray(categories)) {
         // 如果categories不是数组，直接返回首页
         router.push('/');
-        onClose();
         return;
       }
       
@@ -547,7 +547,6 @@ export function MobileDrawer({
         if (!Array.isArray(navigationPages) || navigationPages.length === 0) {
           console.warn('导航页数据未加载完成，返回首页');
           router.push('/');
-          onClose();
           return;
         }
         
@@ -578,51 +577,54 @@ export function MobileDrawer({
         router.push('/');
       }
     }
-    onClose();
   };
 
   // 递归渲染分类
   const renderCategory = (category: SidebarCategory, depth: number = 0) => {
     const hasChildren = category.children && category.children.length > 0;
     const isCollapsedCategory = category.categoryId ? collapsedCategories.has(category.categoryId) : false;
-    const paddingLeft = depth * 16; // 每层缩进16px
-
+    
     return (
-      <div key={category.id}>
-        {/* 父分类 */}
-        <div className="flex items-center" style={{ marginLeft: `${paddingLeft}px` }}>
+      <div key={category.id} className={`${depth > 0 ? 'ml-4' : ''}`}>
+        <div className="flex items-center">
           <button
-            onClick={() => {
-              if (hasChildren && category.categoryId) {
-                toggleCategoryCollapse(category.categoryId);
-              } else {
-                handleCategoryClick(category);
-              }
-            }}
-            className="flex-1 text-left py-3 px-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center justify-between"
+            onClick={() => handleCategoryButtonClick(category)}
+            className={`flex-1 flex items-center py-2 px-3 text-sm rounded-lg text-left transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400`}
+            title={isCollapsed ? category.name : ''}
           >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center mr-2">
-                <CategoryIcon
-                  icon={category.icon}
-                  iconUrl={category.iconUrl}
-                  name={category.name}
-                  size={16}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-              </div>
-              <span className="text-sm font-medium">{category.name}</span>
+            {/* 分类图标 - 固定位置 */}
+            <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+              <CategoryIcon 
+                icon={category.icon} 
+                iconUrl={category.iconUrl}
+                name={category.name}
+                className="w-5 h-5"
+              />
             </div>
-            {hasChildren && (
-              <span className="text-gray-500 dark:text-gray-400 ml-2">
-                {isCollapsedCategory ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-              </span>
+            
+            {!isCollapsed && (
+              <>
+                <span className="ml-2 truncate font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                  {category.name}
+                  {category.websiteCount !== undefined && ` (${category.websiteCount})`}
+                </span>
+                {/* 展开/收缩指示器 */}
+                {hasChildren && (
+                  <span className="ml-auto text-gray-500 dark:text-gray-400">
+                    {isCollapsedCategory ? (
+                      <ChevronRight className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </span>
+                )}
+              </>
             )}
           </button>
         </div>
         
         {/* 子分类 */}
-        {hasChildren && (
+        {hasChildren && !isCollapsed && (
           <div 
             className={`ml-2 overflow-hidden transition-all duration-300 ease-in-out ${
               isCollapsedCategory ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'
@@ -640,7 +642,7 @@ export function MobileDrawer({
     return (
       <div 
         key={subCategory.id}
-        className={`flex items-center py-3 px-4 cursor-pointer ${
+        className={`flex items-center py-2 px-3 rounded-lg cursor-pointer ${
           activeSubCategory === subCategory.id 
             ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
             : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
@@ -649,7 +651,7 @@ export function MobileDrawer({
       >
         <div className="flex items-center flex-1 min-w-0">
           {/* 图标 */}
-          <div className="flex-shrink-0 w-4 h-4 mr-3 flex items-center justify-center">
+          <div className="flex-shrink-0 w-5 h-5 mr-3 flex items-center justify-center">
             <CategoryIcon 
               icon={subCategory.icon}
               iconUrl={subCategory.iconUrl}
@@ -660,175 +662,200 @@ export function MobileDrawer({
           </div>
           
           {/* 子分类名称 */}
-          <span className="text-sm font-medium">
-            {subCategory.name} ({subCategory._count.websites})
-          </span>
+          {!isCollapsed && (
+            <span className="text-sm font-medium truncate">
+              {subCategory.name} ({subCategory._count.websites})
+            </span>
+          )}
         </div>
       </div>
     );
   };
 
   return (
-    <>
-      {/* 背景遮罩 */}
-      <div
-        className={`fixed inset-0 bg-black transition-opacity duration-300 z-40 md:hidden ${
-          isOpen ? 'bg-opacity-50 pointer-events-auto' : 'bg-opacity-0 pointer-events-none'
-        }`}
-        style={{ top: '48px' }}
-        onClick={onClose}
-      />
+    <aside className={`fixed left-0 top-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto z-40 transition-all duration-300 ${
+      isCollapsed ? 'w-16' : 'w-56'
+    }`}>
+      {/* Logo和网站标题 */}
+      <div className={`flex items-center justify-center py-4 border-b border-gray-200 dark:border-gray-700 ${
+        isCollapsed ? 'px-2' : 'px-6'
+      }`}>
+        <Logo 
+          onClick={handleGoHome}
+          showText={!isCollapsed}
+          size="md"
+          className="cursor-pointer"
+        />
+      </div>
       
-      {/* 抽屉内容 */}
-      <div className={`fixed left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-800 z-50 transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`} style={{ top: '48px', height: 'calc(100vh - 48px)' }}>
-        {/* 头部 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <Link href="/" className="flex items-center" onClick={onClose}>
-            <img 
-              src="/logo.png" 
-              alt="网站Logo" 
-              className="w-8 h-8 mr-3 cursor-pointer hover:opacity-80 transition-opacity"
-              title="返回首页"
-            />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              {mode === 'category' ? '分类详情' : 
-               mode === 'website' ? '网站详情' : 
-               mode === 'navigation' ? '导航页' : '导航分类'}
-            </h2>
-          </Link>
-        </div>
+      {/* 根据模式渲染不同内容 */}
+      {mode === 'category' && (
+        <>
+          {/* 返回按钮 */}
+          <div className="border-b border-gray-200 dark:border-gray-700 px-2 py-2">
+            <div 
+              className="flex items-center py-2 px-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+              onClick={handleGoBack}
+            >
+              <div className="flex items-center flex-1 min-w-0">
+                {/* 图标 - 使用与分类列表相同的固定位置布局 */}
+                <div className="flex-shrink-0 w-5 h-5 mr-3 flex items-center justify-center">
+                  <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </div>
+                
+                {/* 返回文字 */}
+                {!isCollapsed && (
+                  <span className="text-sm font-medium truncate">
+                    返回上一页
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* 分类和子分类列表 */}
+          <nav className="flex-1 overflow-y-auto py-4">
+            {category && category.children && category.children.length > 0 ? (
+              <div className="space-y-1 px-2">
+                {/* 子分类列表 */}
+                {category.children.map((subCategory) => renderSubCategory(subCategory))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-gray-500 dark:text-gray-400 text-sm">
+                  {!isCollapsed && '暂无分类数据'}
+                </div>
+              </div>
+            )}
+          </nav>
+        </>
+      )}
+      
+      {mode === 'website' && (
+        <>
+          {/* 返回按钮区域 */}
+          <nav className="space-y-2 p-2">
+            {/* 返回所属分类列表 */}
+            <button
+              onClick={handleGoToCategory}
+              className={`w-full flex items-center py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+              title={isCollapsed ? '返回分类列表' : ''}
+            >
+              {/* 图标 - 固定位置 */}
+              <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                <List className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </div>
+              
+              {!isCollapsed && (
+                <span className="ml-2 text-sm font-medium truncate">
+                  返回分类列表
+                </span>
+              )}
+            </button>
 
-        {/* 移动端导航内容 */}
-        <div className="py-2">
+            {/* 返回导航页 */}
+            <button
+              onClick={handleGoToNavigationPage}
+              className={`w-full flex items-center py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+              title={isCollapsed ? '返回导航页' : ''}
+            >
+              {/* 图标 - 固定位置 */}
+              <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                <Home className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </div>
+              
+              {!isCollapsed && (
+                <span className="ml-2 text-sm font-medium truncate">
+                  返回导航页
+                </span>
+              )}
+            </button>
+          </nav>
+        </>
+      )}
+      
+      {(mode === 'home' || mode === 'navigation') && (
+        <nav className={`space-y-2 p-2`}>
           {loading ? (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               <p className="text-sm">加载中...</p>
             </div>
           ) : (
             <>
-              {/* 分类详情模式 */}
-              {mode === 'category' && (
+              {/* 分类列表 */}
+              {mode === 'home' ? (
                 <>
-                  {/* 返回按钮 */}
-                  <div className="border-b border-gray-200 dark:border-gray-700 px-2 py-2">
-                    <div 
-                      className="flex items-center py-3 px-4 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                      onClick={handleGoBack}
-                    >
-                      <div className="flex items-center flex-1 min-w-0">
-                        <div className="flex-shrink-0 w-4 h-4 mr-3 flex items-center justify-center">
-                          <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                        </div>
-                        <span className="text-sm font-medium">返回上一页</span>
-                      </div>
+                  {homeSettings.sidebarCategories.map((category) => (
+                    <div key={category.id}>
+                      {renderCategory(category, 0)}
                     </div>
-                  </div>
+                  ))}
                   
-                  {/* 分类和子分类列表 */}
-                  <div className="py-4">
-                    {category && category.children && category.children.length > 0 ? (
-                      <div className="space-y-1">
-                        {category.children.map((subCategory) => renderSubCategory(subCategory))}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="text-gray-500 dark:text-gray-400 text-sm">
-                          暂无分类数据
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* 网站详情模式 */}
-              {mode === 'website' && (
-                <>
-                  {/* 返回按钮区域 */}
-                  <div className="space-y-2 p-2">
-                    {/* 返回所属分类列表 */}
-                    <button
-                      onClick={handleGoToCategory}
-                      className="w-full flex items-center py-3 px-4 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="flex-shrink-0 w-4 h-4 mr-3 flex items-center justify-center">
-                        <List className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <span className="text-sm font-medium">返回分类列表</span>
-                    </button>
-
-                    {/* 返回导航页 */}
-                    <button
-                      onClick={handleGoToNavigationPage}
-                      className="w-full flex items-center py-3 px-4 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="flex-shrink-0 w-4 h-4 mr-3 flex items-center justify-center">
-                        <Home className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <span className="text-sm font-medium">返回导航页</span>
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {/* 主页和导航页模式 */}
-              {(mode === 'home' || mode === 'navigation') && (
-                <>
-                  {/* 分类列表 */}
-                  {mode === 'home' ? (
+                  {/* 自定义链接 */}
+                  {homeSettings.customLinks.length > 0 && (
                     <>
-                      {homeSettings.sidebarCategories.map((category) => renderCategory(category))}
-                      
-                      {/* 自定义链接 */}
-                      {homeSettings.customLinks.length > 0 && (
-                        <>
-                          <div className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-4">自定义链接</p>
-                          </div>
-                          {homeSettings.customLinks.map((link) => (
-                            <button
-                              key={link.id}
-                              onClick={() => handleCustomLinkClick(link)}
-                              className="w-full text-left py-3 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
-                            >
-                              <span className="text-sm font-medium">{link.name}</span>
-                              {link.description && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{link.description}</p>
-                              )}
-                            </button>
-                          ))}
-                        </>
-                      )}
-                      
-                      {/* 如果没有任何内容 */}
-                      {homeSettings.sidebarCategories.length === 0 && homeSettings.customLinks.length === 0 && (
-                        <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                          <p className="text-sm">暂无分类，请在后台添加</p>
+                      {!isCollapsed && (
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 px-3">自定义链接</p>
                         </div>
                       )}
+                      {homeSettings.customLinks.map((link) => (
+                        <button
+                          key={link.id}
+                          onClick={() => handleCustomLinkClick(link)}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                            isCollapsed ? 'text-center' : ''
+                          }`}
+                          title={isCollapsed ? link.name : link.description}
+                        >
+                          {isCollapsed ? (
+                            <div className="flex justify-center">
+                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">🔗</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm font-medium">{link.name}</span>
+                          )}
+                        </button>
+                      ))}
                     </>
-                                ) : (
+                  )}
+                  
+                  {/* 如果没有任何内容 */}
+                  {homeSettings.sidebarCategories.length === 0 && homeSettings.customLinks.length === 0 && !isCollapsed && (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      <p className="text-sm">暂无分类，请在后台添加</p>
+                    </div>
+                  )}
+                </>
+              ) : (
                 <>
                   {/* 返回网站首页按钮 - 仅在导航页模式显示 */}
                   <button
                     onClick={handleGoToMainHome}
-                    className="flex-1 text-left py-3 px-4 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center justify-between"
+                    className={`flex-1 flex items-center py-2 px-3 text-sm rounded-lg text-left transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400`}
+                    title={isCollapsed ? '返回网站首页' : ''}
                   >
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center mr-2">
-                        <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <span className="text-sm font-medium">返回网站首页</span>
+                    {/* 图标 - 固定位置 */}
+                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                      <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </div>
+                    
+                    {!isCollapsed && (
+                      <span className="ml-2 truncate font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        返回网站首页
+                      </span>
+                    )}
                   </button>
 
                   {processedCategories.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="text-gray-500 dark:text-gray-400 text-sm">
-                        <div className="mb-2">🎯</div>
-                        <div>暂无分类配置</div>
+                        {!isCollapsed && (
+                          <>
+                            <div className="mb-2">🎯</div>
+                            <div>暂无分类配置</div>
+                          </>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -836,12 +863,10 @@ export function MobileDrawer({
                   )}
                 </>
               )}
-                </>
-              )}
             </>
           )}
-        </div>
-      </div>
-    </>
+        </nav>
+      )}
+    </aside>
   );
 }

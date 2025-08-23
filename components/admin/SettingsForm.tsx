@@ -1,20 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 
 export function SettingsForm() {
-  const [passwordData, setPasswordData] = useState({
+  const [passwords, setPasswords] = useState({
     oldPassword: '',
     newPassword: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+
+
+
+
+
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +31,7 @@ export function SettingsForm() {
     setError('');
     setMessage('');
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
+    if (passwords.newPassword !== passwords.confirmPassword) {
       setError('新密码与确认密码不匹配');
       setIsLoading(false);
       return;
@@ -35,15 +44,15 @@ export function SettingsForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          oldPassword: passwordData.oldPassword,
-          newPassword: passwordData.newPassword,
+          oldPassword: passwords.oldPassword,
+          newPassword: passwords.newPassword,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         setMessage(data.message);
-        setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        setPasswords({ oldPassword: '', newPassword: '', confirmPassword: '' });
       } else {
         const errorData = await response.json();
         setError(errorData.error || '修改密码失败');
@@ -58,6 +67,9 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-6">
+
+
+      {/* 密码修改 */}
       <Card>
         <CardHeader>
           <CardTitle>修改密码</CardTitle>
@@ -72,8 +84,8 @@ export function SettingsForm() {
               <Input
                 id="oldPassword"
                 type="password"
-                value={passwordData.oldPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                value={passwords.oldPassword}
+                onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
                 placeholder="请输入原密码"
                 required
                 disabled={isLoading}
@@ -85,8 +97,8 @@ export function SettingsForm() {
               <Input
                 id="newPassword"
                 type="password"
-                value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                value={passwords.newPassword}
+                onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                 placeholder="请输入新密码（至少6位）"
                 minLength={6}
                 required
@@ -99,8 +111,8 @@ export function SettingsForm() {
               <Input
                 id="confirmPassword"
                 type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                value={passwords.confirmPassword}
+                onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
                 placeholder="请再次输入新密码"
                 minLength={6}
                 required

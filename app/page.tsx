@@ -1,5 +1,10 @@
-import { Layout } from '@/components/Layout';
+import { GlobalLayout } from '@/components/GlobalLayout';
+import { MainContent } from '@/components/MainContent';
 
 export default async function HomePage() {
-  return <Layout />;
+  return (
+    <GlobalLayout>
+      <MainContent showHeader={false} />
+    </GlobalLayout>
+  );
 }

@@ -1,96 +1,88 @@
-import { Layout } from '@/components/Layout';
-import { Category } from '@/types';
-import { prisma } from '@/lib/prisma';
-import { cache, CacheService } from '@/lib/redis';
+'use client';
+
+import { useState } from 'react';
 import { WebsiteDetailContent } from './WebsiteDetailContent';
+import { GlobalLayout } from '@/components/GlobalLayout';
+import { Category } from '@/types';
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-interface LocalCategory {
+interface Website {
   id: number;
-  name: string;
+  name: string | null;
+  url: string;
   iconUrl: string | null;
-  parentId: number | null;
+  description: string | null;
   order: number;
-  createdAt: Date;
-  updatedAt: Date;
-  websites?: any[];
-  children?: any[];
+  isRecommended: boolean;
+  categoryId: number;
+  createdAt: string;
+  updatedAt: string;
+  category: {
+    id: number;
+    name: string;
+    iconUrl: string | null;
+  };
 }
 
-interface WebsiteDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+export default function WebsiteDetailPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [website, setWebsite] = useState<Website | null>(null);
+  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
 
-// 转换函数：将LocalCategory转换为Category
-const convertToCategory = (localCat: any): Category => ({
-  ...localCat,
-  iconUrl: localCat.iconUrl || null,
-  createdAt: new Date(localCat.createdAt),
-  updatedAt: new Date(localCat.updatedAt)
-});
+  // 获取分类数据
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          // API返回的数据结构是 { categories: [...], hierarchical: [...] }
+          setCategories(data.categories || data);
+        }
+      } catch (error) {
+        console.error('获取分类失败:', error);
+      }
+    };
 
-// 获取分类数据的函数
-const getCategories = async (): Promise<any[]> => {
-  try {
-    const cacheKey = CacheService.keys.categories();
-    const cached = await cache.get(cacheKey);
-    
-    if (cached && Array.isArray(cached)) {
-      return cached as any[];
-    }
-    
-    const categories = await prisma.category.findMany({
-      include: {
-        websites: {
-          orderBy: {
-            order: 'asc',
-          },
-        },
-        children: {
-          include: {
-            websites: {
-              orderBy: {
-                order: 'asc',
-              },
-            },
-          },
-          orderBy: {
-            order: 'asc',
-          },
-        },
-      },
-      orderBy: {
-        order: 'asc',
-      },
-    });
-    
-    // 确保categories是数组后再缓存
-    if (Array.isArray(categories)) {
-      await cache.set(cacheKey, categories, 300); // 5分钟缓存
-      return categories;
-    } else {
-      console.warn('数据库返回的分类数据不是数组:', categories);
-      return [];
-    }
-  } catch (error) {
-    console.error('获取分类失败:', error);
-    return [];
+    fetchCategories();
+  }, []);
+
+
+
+  // 处理网站数据更新
+  const handleWebsiteUpdate = (websiteData: Website) => {
+    setWebsite(websiteData);
+    setLoading(false);
+  };
+
+
+  
+  // 只有在网站数据加载完成后才显示布局
+  if (!website && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center text-gray-500 dark:text-gray-400">
+          <div className="text-xl">网站不存在</div>
+        </div>
+      </div>
+    );
   }
-};
 
-export default async function WebsiteDetailPage({ params }: WebsiteDetailPageProps) {
-  const resolvedParams = await params;
-  const categories = await getCategories();
-  
-  // 确保categories是数组，如果不是则使用空数组
-  const safeCategoriesList = Array.isArray(categories) ? categories : [];
-  
   return (
-    <Layout 
-      showMainContent={false}
+    <GlobalLayout 
+      sidebarMode="website"
+      sidebarProps={{
+        website,
+        categories
+      }}
     >
-      <WebsiteDetailContent categories={safeCategoriesList.map(convertToCategory)} />
-    </Layout>
+      <WebsiteDetailContent 
+        categories={categories} 
+        onWebsiteUpdate={handleWebsiteUpdate}
+        loading={loading}
+      />
+    </GlobalLayout>
   );
 }

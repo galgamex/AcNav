@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { SearchBar } from './SearchBar';
 import { CategorySection } from './CategorySection';
+import { RecommendedSection } from './RecommendedSection';
 import { Website, Category } from '@/types';
 
 interface MainContentProps {
@@ -15,6 +16,7 @@ export function MainContent({ showHeader = false }: MainContentProps) {
   const [searchResults, setSearchResults] = useState<Website[]>([]);
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<number | null>(null);
+  const [showRecommended, setShowRecommended] = useState(false);
 
   // 获取分类和网站数据
   useEffect(() => {
@@ -41,6 +43,7 @@ export function MainContent({ showHeader = false }: MainContentProps) {
         ]);
 
         const selectedCategoryIds = homeData.homeSettings?.sidebarCategories?.map((sc: any) => sc.categoryId) || [];
+        setShowRecommended(homeData.homeSettings?.showRecommended || false);
         // API直接返回分类数组
         const allCategories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || []);
         
@@ -149,8 +152,14 @@ export function MainContent({ showHeader = false }: MainContentProps) {
             <p className="text-gray-500">搜索功能已禁用，当前仅显示分类</p>
           </div>
         ) : (
-          // 分类区块显示
+          // 主要内容显示
           <div className="space-y-12">
+            {/* 推荐专区 */}
+            {showRecommended && (
+              <RecommendedSection className="mb-12" />
+            )}
+            
+            {/* 分类区块显示 */}
             {categories.length > 0 ? (
               categories.map((category) => {
                 return (

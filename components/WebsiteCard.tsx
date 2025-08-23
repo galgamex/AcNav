@@ -10,9 +10,10 @@ interface WebsiteCardProps {
   isRecommended?: boolean;
   fromCategory?: boolean;
   categoryId?: number;
+  fromNavPage?: string;
 }
 
-export function WebsiteCard({ website, isRecommended = false, fromCategory = false, categoryId }: WebsiteCardProps) {
+export function WebsiteCard({ website, isRecommended = false, fromCategory = false, categoryId, fromNavPage }: WebsiteCardProps) {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipStyle, setTooltipStyle] = useState({});
   const [tooltipArrowStyle, setTooltipArrowStyle] = useState({});
@@ -20,9 +21,21 @@ export function WebsiteCard({ website, isRecommended = false, fromCategory = fal
 
   const navigateToDetail = () => {
     let url = `/website/${website.id}`;
+    const params = new URLSearchParams();
+    
     if (fromCategory && categoryId) {
-      url += `?from=category&categoryId=${categoryId}`;
+      params.append('from', 'category');
+      params.append('categoryId', categoryId.toString());
     }
+    
+    if (fromNavPage) {
+      params.append('fromNavPage', fromNavPage);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
     window.location.href = url;
   };
 
@@ -118,7 +131,7 @@ export function WebsiteCard({ website, isRecommended = false, fromCategory = fal
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate">{website.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate hidden md:block">{website.description}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{website.description}</p>
           </div>
         </div>
       </div>
