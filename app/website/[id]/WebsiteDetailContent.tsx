@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Calendar, ChevronRight, ExternalLink, Globe, Home, Plus, Star, Tag as TagIcon, X } from 'lucide-react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -418,13 +419,14 @@ export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: ext
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               {website.iconUrl && (
-                <img 
+                <Image 
                   src={website.iconUrl} 
                   alt={website.name || '网站图标'}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 rounded-lg object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/icons/default.png';
+                  onError={() => {
+                    // Next.js Image组件会自动处理错误
                   }}
                 />
               )}

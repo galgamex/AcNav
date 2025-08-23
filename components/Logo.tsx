@@ -1,6 +1,7 @@
 'use client';
 
 import { useGlobalState } from '@/contexts/GlobalStateContext';
+import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -64,11 +65,15 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
           {logoSettings.logoText.charAt(0).toUpperCase()}
         </div>
       ) : (
-        <img
+        <Image
           src={logoSettings.logoUrl}
           alt="网站Logo"
+          width={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
+          height={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
           className={`${sizeClasses[size]} flex-shrink-0 object-contain`}
-          onError={handleImageError}
+          onError={() => {
+            // Next.js Image组件会自动处理错误
+          }}
         />
       )}
       {showText && (

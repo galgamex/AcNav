@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Home, ChevronRight, ChevronDown, ArrowLeft, List, Globe } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CategoryIcon } from './CategoryIcon';
 import { useGlobalState } from '@/contexts/GlobalStateContext';
@@ -686,9 +687,11 @@ export function MobileDrawer({
         {/* 头部 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <Link href="/" className="flex items-center" onClick={onClose}>
-            <img 
+            <Image 
               src="/logo.png" 
               alt="网站Logo" 
+              width={32}
+              height={32}
               className="w-8 h-8 mr-3 cursor-pointer hover:opacity-80 transition-opacity"
               title="返回首页"
             />

@@ -2,6 +2,20 @@ import { prisma } from '@/lib/prisma';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { AuthGuard } from '@/components/admin/AuthGuard';
 
+interface Category {
+  id: number;
+  name: string;
+  parentId: number | null;
+  order: number;
+  iconUrl: string | null;
+  icon: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  _count: {
+    websites: number;
+  };
+}
+
 async function getCategories() {
   // 获取所有分类
   const allCategories = await prisma.category.findMany({
@@ -18,12 +32,12 @@ async function getCategories() {
   const topLevelCategories: any[] = [];
 
   // 先创建所有分类的映射
-  allCategories.forEach(category => {
+  allCategories.forEach((category: Category) => {
     categoryMap.set(category.id, { ...category, children: [] });
   });
 
   // 构建层级关系
-  allCategories.forEach(category => {
+  allCategories.forEach((category: Category) => {
     if (category.parentId) {
       const parent = categoryMap.get(category.parentId);
       if (parent) {

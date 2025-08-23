@@ -18,7 +18,7 @@ export function SearchBar({ onSearchResults, onClear }: SearchBarProps) {
 
   // 防抖搜索函数
   const debouncedSearch = useCallback(
-    debounce(async (term: string) => {
+    async (term: string) => {
       if (!term.trim()) {
         setSearchResults([]);
         setShowResults(false);
@@ -41,12 +41,16 @@ export function SearchBar({ onSearchResults, onClear }: SearchBarProps) {
       } finally {
         setIsSearching(false);
       }
-    }, 300),
+    },
     [onSearchResults, onClear]
   );
 
   useEffect(() => {
-    debouncedSearch(searchTerm);
+    const timeoutId = setTimeout(() => {
+      debouncedSearch(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [searchTerm, debouncedSearch]);
 
   const handleClear = () => {

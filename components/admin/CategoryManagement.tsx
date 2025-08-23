@@ -5,6 +5,7 @@ import { Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Edit, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
 import { CategoryForm } from './CategoryForm';
 import { useRouter } from 'next/navigation';
 
@@ -167,9 +168,11 @@ function CategoryItem({
               )}
               {!hasChildren && <div className="w-6 mr-2" />}
               {category.iconUrl && (
-                <img
+                <Image
                   src={category.iconUrl}
                   alt={category.name}
+                  width={20}
+                  height={20}
                   className="w-5 h-5 mr-2"
                 />
               )}
