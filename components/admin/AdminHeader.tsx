@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, Menu } from 'lucide-react';
+import { LogOut, Settings, Menu, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface AdminHeaderProps {
@@ -19,6 +19,10 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
     } catch (error) {
       console.error('退出登录失败:', error);
     }
+  };
+
+  const handleGoHome = () => {
+    router.push('/');
   };
 
   return (
@@ -41,6 +45,16 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
         </div>
         
         <div className="flex items-center space-x-1 md:space-x-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleGoHome}
+            className="h-8 w-8 md:h-10 md:w-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+            title="返回首页"
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+          
           <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
             <Settings className="h-4 w-4" />
           </Button>

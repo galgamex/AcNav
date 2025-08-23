@@ -38,8 +38,8 @@ cp env.example .env.local
 docker-compose -f docker-compose.new.yaml up -d
 
 # 等待服务启动完成，然后访问
-# 用户端: http://localhost:3000
-# 管理后台: http://localhost:3000/admin
+# 用户端: http://localhost:3001
+# 管理后台: http://localhost:3001/admin
 ```
 
 ### 方式二：本地开发
@@ -80,7 +80,7 @@ REDIS_URL="redis://localhost:6379"
 
 # NextAuth.js 配置
 NEXTAUTH_SECRET="your-secret-key-here"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3001"
 
 # 应用配置
 NODE_ENV="development"
@@ -145,8 +145,8 @@ npm run db:studio
 
 ## 📱 访问地址
 
-- **用户端**: http://localhost:3000
-- **管理后台**: http://localhost:3000/admin
+- **用户端**: http://localhost:3001
+- **管理后台**: http://localhost:3001/admin
 
 ## 🔄 从旧版本迁移
 

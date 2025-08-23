@@ -336,7 +336,7 @@ export default function PageSettingsPage() {
                 <div className="text-xs text-gray-500 mb-2">
                   分类数量: {categories.length} | 认证状态: {isAuthenticated ? '已认证' : '未认证'}
                 </div>
-                <div className="max-h-96 overflow-y-auto border rounded p-3 space-y-2">
+                <div className="max-h-96 overflow-y-auto scrollbar-hide border rounded p-3 space-y-2">
                   {categories.length === 0 ? (
                     <div className="text-center py-4 text-gray-500">
                       暂无分类数据，请检查数据库连接或刷新页面

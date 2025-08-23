@@ -41,7 +41,17 @@
   --text-color-disabled: rgba(0, 0, 0, 0.25);
 }
 
-/* 隐藏滚动条样式 */
+/* 全局隐藏滚动条样式 */
+* {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* 隐藏滚动条样式类 */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
   scrollbar-width: none;  /* Firefox */
@@ -144,8 +154,6 @@ html {
   
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 148, 148, 0.1) transparent;
   display: flex;
   flex-direction: column;
   height: auto;

@@ -1,9 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, Settings, Menu, Plus, ExternalLink } from 'lucide-react';
+import { Moon, Sun, Settings, Menu, Plus, ExternalLink, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useGlobalState } from '@/contexts/GlobalStateContext';
+import { useState, useEffect, useRef } from 'react';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -13,7 +14,29 @@ interface HeaderProps {
 
 export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollapsed = false }: HeaderProps) {
   const { state, actions } = useGlobalState();
-  const { isDark, isLoading } = state;
+  const { isDark, navigationPages, isLoading } = state;
+  const [showNavigationDropdown, setShowNavigationDropdown] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 确保客户端挂载
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // 点击外部关闭下拉菜单
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNavigationDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header 
@@ -43,6 +66,34 @@ export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollaps
             <Menu className="h-5 w-5" />
           </Button>
           
+          {/* 更多导航下拉菜单 */}
+          {isClient && navigationPages && navigationPages.length > 0 && (
+            <div className="relative" ref={dropdownRef}>
+              <Button
+                variant="ghost"
+                onClick={() => setShowNavigationDropdown(!showNavigationDropdown)}
+                className="flex items-center space-x-1 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 h-8 md:h-10"
+              >
+                <span>更多导航</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showNavigationDropdown ? 'rotate-180' : ''}`} />
+              </Button>
+              
+              {showNavigationDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-50">
+                  {navigationPages.map((page) => (
+                    <Link
+                      key={page.id}
+                      href={`/nav/${page.slug}`}
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => setShowNavigationDropdown(false)}
+                    >
+                      {page.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
         

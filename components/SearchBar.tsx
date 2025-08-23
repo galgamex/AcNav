@@ -88,7 +88,7 @@ export function SearchBar({ onSearchResults, onClear }: SearchBarProps) {
 
       {/* 搜索结果 */}
       {showResults && searchResults.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto scrollbar-hide">
           <div className="p-4">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               找到 {searchResults.length} 个结果

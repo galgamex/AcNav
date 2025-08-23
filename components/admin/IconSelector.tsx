@@ -364,7 +364,7 @@ export function IconSelector({ value, onChange, className }: IconSelectorProps) 
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
           />
-          <div className="grid grid-cols-8 gap-2 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-8 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
             {filteredIcons.map((icon) => {
               const IconComponent = icon.icon
               return (

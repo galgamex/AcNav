@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminMobileDrawer } from '@/components/admin/AdminMobileDrawer';
@@ -11,6 +12,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMobileDrawer = () => {
     setIsMobileDrawerOpen(!isMobileDrawerOpen);
@@ -19,6 +21,11 @@ export default function AdminLayout({
   const closeMobileDrawer = () => {
     setIsMobileDrawerOpen(false);
   };
+
+  // 如果是登录页面，直接返回children，不显示管理后台布局
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

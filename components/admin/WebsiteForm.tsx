@@ -137,7 +137,7 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
           <DialogTitle>
             {website ? '编辑网站' : '添加网站'}

@@ -292,7 +292,7 @@ export function NavigationPageForm({ navigationPage, onSuccess }: NavigationPage
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label className="block text-sm font-medium mb-2">选择分类</Label>
-            <div className="max-h-96 overflow-y-auto border rounded p-3 space-y-2">
+            <div className="max-h-96 overflow-y-auto scrollbar-hide border rounded p-3 space-y-2">
               {categories.map((category) => {
                 const isCollapsed = collapsedCategories.has(category.id);
                 const hasChildren = category.children && category.children.length > 0;
