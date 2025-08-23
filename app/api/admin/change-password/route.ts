@@ -48,7 +48,14 @@ export async function POST(request: NextRequest) {
       data: { passwordHash: hashedNewPassword },
     });
 
-    return NextResponse.json({ message: '密码修改成功' });
+    // 清除用户会话，强制重新登录
+    const cookieStore = await cookies();
+    cookieStore.delete('admin-session');
+
+    return NextResponse.json({ 
+      message: '密码修改成功，请重新登录',
+      requireRelogin: true 
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

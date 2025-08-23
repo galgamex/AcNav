@@ -49,11 +49,31 @@ export function useAuth() {
     }
   };
 
+  // 检查是否需要重新登录（用于密码修改后的处理）
+  const checkRequireRelogin = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (!response.ok && response.status === 401) {
+        // 如果认证失败，清除本地状态并跳转到登录页
+        setAdmin(null);
+        router.push('/admin/login');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('检查重新登录状态失败:', error);
+      setAdmin(null);
+      router.push('/admin/login');
+      return true;
+    }
+  };
+
   return {
     admin,
     loading,
     checkAuth,
     logout,
+    checkRequireRelogin,
     isAuthenticated: !!admin
   };
 }

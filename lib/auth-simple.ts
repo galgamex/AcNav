@@ -65,19 +65,19 @@ export async function verifyAdmin(username: string, password: string): Promise<A
   }
 }
 
-export async function changeAdminPassword(adminId: number, oldPassword: string, newPassword: string): Promise<boolean> {
+export async function changeAdminPassword(adminId: number, oldPassword: string, newPassword: string): Promise<{ success: boolean; requireRelogin?: boolean }> {
   try {
     const admin = await prisma.admin.findUnique({
       where: { id: adminId }
     });
 
     if (!admin) {
-      return false;
+      return { success: false };
     }
 
     const isValidOldPassword = await bcrypt.compare(oldPassword, admin.passwordHash);
     if (!isValidOldPassword) {
-      return false;
+      return { success: false };
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
@@ -86,10 +86,14 @@ export async function changeAdminPassword(adminId: number, oldPassword: string, 
       data: { passwordHash: hashedNewPassword }
     });
 
-    return true;
+    // 清除用户会话
+    const cookieStore = await cookies();
+    cookieStore.delete('admin-session');
+
+    return { success: true, requireRelogin: true };
   } catch (error) {
     console.error('修改管理员密码失败:', error);
-    return false;
+    return { success: false };
   }
 }
 

@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export function SettingsForm() {
+  const { checkRequireRelogin } = useAuth();
   const [passwords, setPasswords] = useState({
     oldPassword: '',
     newPassword: '',
@@ -37,6 +39,12 @@ export function SettingsForm() {
       return;
     }
 
+    // 确认用户知道修改密码后会需要重新登录
+    if (!confirm('修改密码后需要重新登录，是否继续？')) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/admin/change-password', {
         method: 'POST',
@@ -53,6 +61,15 @@ export function SettingsForm() {
         const data = await response.json();
         setMessage(data.message);
         setPasswords({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        
+        // 如果需要重新登录，显示提示并跳转到登录页
+        if (data.requireRelogin) {
+          toast.success('密码修改成功，请重新登录');
+          // 检查认证状态并处理重新登录
+          setTimeout(async () => {
+            await checkRequireRelogin();
+          }, 1000);
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.error || '修改密码失败');
@@ -74,7 +91,7 @@ export function SettingsForm() {
         <CardHeader>
           <CardTitle>修改密码</CardTitle>
           <CardDescription>
-            更改您的管理员账号密码
+            更改您的管理员账号密码。修改密码后需要重新登录以确保安全性。
           </CardDescription>
         </CardHeader>
         <CardContent>
