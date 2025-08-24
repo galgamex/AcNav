@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AcNav - 导航站',
+  title: 'AcMoe - 导航站',
   description: '精选优质网站导航',
   icons: {
     icon: '/Logo/Logo.png',

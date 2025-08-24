@@ -14,10 +14,10 @@ export async function GET() {
 
     // 转换为对象格式
     const homeSettings = {
-      title: settings.find((s: { key: string; value: string }) => s.key === 'home_title')?.value || 'AcNav 导航站',
+              title: settings.find((s: { key: string; value: string }) => s.key === 'home_title')?.value || 'AcMoe 导航站',
       description: settings.find((s: { key: string; value: string }) => s.key === 'home_description')?.value || '精选优质网站导航',
       keywords: settings.find((s: { key: string; value: string }) => s.key === 'home_keywords')?.value || '导航,网站,工具',
-      welcomeMessage: settings.find((s: { key: string; value: string }) => s.key === 'home_welcome_message')?.value || '欢迎使用 AcNav 导航站',
+              welcomeMessage: settings.find((s: { key: string; value: string }) => s.key === 'home_welcome_message')?.value || '欢迎使用 AcMoe 导航站',
       showRecommended: settings.find((s: { key: string; value: string }) => s.key === 'home_show_recommended')?.value === 'true',
       sidebarCategories: JSON.parse(settings.find((s: { key: string; value: string }) => s.key === 'home_sidebar_categories')?.value || '[]'),
       customLinks: JSON.parse(settings.find((s: { key: string; value: string }) => s.key === 'home_custom_links')?.value || '[]'),
