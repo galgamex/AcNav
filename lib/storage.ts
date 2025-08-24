@@ -159,7 +159,7 @@ export const clearAllCache = (): void => {
   if (!isBrowser) return;
   
   try {
-    Object.values(STORAGE_KEYS).forEach(key => {
+    Object.values(STORAGE_KEYS).forEach((key: string) => {
       localStorage.removeItem(key);
     });
   } catch (error) {

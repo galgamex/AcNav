@@ -88,7 +88,7 @@ export async function GET(
 
     // 将访问数据映射到日期序列
     const visitMap = new Map();
-    visits.forEach(visit => {
+    visits.forEach((visit: { date: Date; mobileVisits: number; desktopVisits: number }) => {
       const dateKey = visit.date.toISOString().split('T')[0];
       visitMap.set(dateKey, visit);
     });

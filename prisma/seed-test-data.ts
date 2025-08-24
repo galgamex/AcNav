@@ -110,7 +110,7 @@ async function main() {
 
   const createdSecondaryCategories = [];
   for (const categoryData of secondaryCategories) {
-    const parentCategory = createdPrimaryCategories.find(c => c.name === categoryData.parentName);
+    const parentCategory = createdPrimaryCategories.find((c: { name: string }) => c.name === categoryData.parentName);
     if (parentCategory) {
       const category = await prisma.category.upsert({
         where: { name: categoryData.name },
@@ -559,7 +559,7 @@ async function main() {
 
   // 创建网站和关联标签
   for (const websiteData of websites) {
-    const category = allCategories.find(c => c.name === websiteData.categoryName);
+    const category = allCategories.find((c: { name: string }) => c.name === websiteData.categoryName);
     if (!category) continue;
 
     const existingWebsite = await prisma.website.findFirst({
@@ -583,7 +583,7 @@ async function main() {
 
       // 关联标签
       for (const tagName of websiteData.tags) {
-        const tag = createdTags.find(t => t.name === tagName);
+        const tag = createdTags.find((t: { name: string }) => t.name === tagName);
         if (tag) {
           await prisma.websiteTag.create({
             data: {
