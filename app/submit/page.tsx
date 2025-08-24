@@ -40,10 +40,12 @@ export default function SubmitPage() {
         const response = await fetch('/api/categories');
         if (response.ok) {
           const data = await response.json();
-          setCategories(data);
+          // 确保data是数组，如果不是则使用空数组
+          setCategories(Array.isArray(data) ? data : []);
         }
       } catch (error) {
         console.error('获取分类失败:', error);
+        setCategories([]);
       }
     };
 
@@ -214,7 +216,7 @@ export default function SubmitPage() {
                     <SelectValue placeholder="请选择网站分类" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {Array.isArray(categories) && categories.map((category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
                         {category.name}
                       </SelectItem>

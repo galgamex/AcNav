@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { CacheService } from '@/lib/redis';
+import { sendApprovalEmail, sendRejectionEmail } from '@/lib/email';
 
 // 更新申请状态的数据验证模式
 const updateSubmissionSchema = z.object({
@@ -171,6 +172,18 @@ export async function PUT(
         category: true
       }
     });
+
+    // 发送邮件通知
+    try {
+      if (validatedData.status === 'approved') {
+        await sendApprovalEmail(updatedSubmission);
+      } else if (validatedData.status === 'rejected') {
+        await sendRejectionEmail(updatedSubmission, validatedData.adminNote);
+      }
+    } catch (emailError) {
+      console.error('发送邮件通知失败:', emailError);
+      // 邮件发送失败不影响审核结果，只记录错误
+    }
     
     return NextResponse.json({
       message: '申请状态更新成功',

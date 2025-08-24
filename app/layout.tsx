@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     shortcut: '/Logo/Logo.png',
     apple: '/Logo/Logo.png',
   },
+  other: {
+    'google-fonts': 'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap',
+  },
 };
 
 export default function RootLayout({
@@ -23,15 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-scroll-behavior="smooth">
       <head>
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap"
         />
       </head>
       <body className={inter.className}>

@@ -120,7 +120,7 @@ export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: ext
     fetchWebsite();
     fetchTags();
     fetchAvailableTags();
-  }, [websiteId]); // 移除 onWebsiteUpdate 依赖
+  }, [websiteId, onWebsiteUpdate]);
 
   const handleBack = () => {
     if (fromCategory && categoryId) {
@@ -362,7 +362,7 @@ export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: ext
   }
 
   return (
-    <div className="px-6 py-4">
+    <div className="px-6 py-6">
       {/* 面包屑导航 */}
       <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
         {getBreadcrumbs().map((crumb, index) => (

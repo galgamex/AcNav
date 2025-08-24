@@ -148,7 +148,7 @@ const loadStateFromStorage = () => {
   }>(
     STORAGE_KEYS.LOGO_SETTINGS, 
     CACHE_CONFIG.LOGO_SETTINGS
-  ) || { siteName: 'AcMoe导航', logoUrl: '/Logo/Logo.png', logoText: '' };
+  ) || { siteName: 'ACGN导航', logoUrl: '/Logo/Logo.png', logoText: '' };
   
   return {
     isDark,

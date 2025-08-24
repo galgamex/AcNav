@@ -2,6 +2,7 @@
 
 import { useGlobalState } from '@/contexts/GlobalStateContext';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 interface LogoProps {
   className?: string;
@@ -25,6 +26,12 @@ const textSizeClasses = {
 export function Logo({ className = '', onClick, showText = true, size = 'md' }: LogoProps) {
   const { state } = useGlobalState();
   const { logoSettings, isLoading } = state;
+  const [isClient, setIsClient] = useState(false);
+
+  // 确保客户端挂载
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleClick = () => {
     if (onClick) {
@@ -32,7 +39,8 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
     }
   };
 
-  if ((isLoading.logo && !logoSettings.siteName) || !logoSettings.siteName) {
+  // 服务端渲染时显示加载状态，避免水合不匹配
+  if (!isClient || (isLoading.logo && !logoSettings.siteName) || !logoSettings.siteName) {
     return (
       <div className={`flex items-center justify-center ${className}`}>
         <div className={`${sizeClasses[size]} bg-gray-200 dark:bg-gray-700 rounded animate-pulse`}></div>
@@ -68,7 +76,7 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
         />
       )}
       {showText && (
-        <span className={`${isVertical ? 'mt-4' : 'ml-4'} font-semibold text-gray-900 dark:text-white ${textSizeClasses[size]} ${isVertical ? 'text-center' : 'truncate'} font-fangzheng`}>
+        <span className={`${isVertical ? 'mt-4' : 'ml-4'} font-semibold text-gray-900 dark:text-white ${textSizeClasses[size]} ${isVertical ? 'text-center' : 'truncate'}`}>
           {logoSettings.siteName}
         </span>
       )}

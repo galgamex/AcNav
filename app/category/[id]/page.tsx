@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { WebsiteCard } from '@/components/WebsiteCard';
 import { Button } from '@/components/ui/button';
 import { GlobalLayout } from '@/components/GlobalLayout';
-import { ArrowLeft, Globe } from 'lucide-react';
+import { ArrowLeft, Globe, ChevronRight, Home } from 'lucide-react';
 import Link from 'next/link';
 
 interface Website {
@@ -50,6 +50,7 @@ interface CategoryDetail {
 export default function CategoryDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [category, setCategory] = useState<CategoryDetail | null>(null);
   const [activeSubCategory, setActiveSubCategory] = useState<number | null>(null);
 
@@ -125,6 +126,56 @@ export default function CategoryDetailPage() {
     return category.name;
   };
 
+  // 获取热门网站名称
+  function getPopularWebsiteNames(): string[] {
+    const websites = getCurrentWebsites();
+    // 获取前5个网站的名称，如果没有5个就返回所有
+    return websites.slice(0, 5).map(website => website.name).filter(Boolean);
+  }
+
+  // 获取面包屑导航
+  function getBreadcrumbs() {
+    const fromNavPage = searchParams?.get('fromNavPage');
+    
+    // 根据来源确定首页链接
+    let homeLink = '/';
+    let homeName = '首页';
+    
+    if (fromNavPage) {
+      // 如果是从导航页进入的，首页链接指向对应的导航页
+      homeLink = `/nav/${fromNavPage}`;
+      homeName = '导航页';
+    }
+    
+    const breadcrumbs = [{ name: homeName, href: homeLink }];
+    
+    // 添加分类信息
+    if (category) {
+      // 如果是子分类，先添加父分类
+      if (activeSubCategory) {
+        breadcrumbs.push({
+          name: category.name,
+          href: `/category/${category.id}`
+        });
+        
+        const subCategory = category.children.find(child => child.id === activeSubCategory);
+        if (subCategory) {
+          breadcrumbs.push({
+            name: subCategory.name,
+            href: '#'
+          });
+        }
+      } else {
+        breadcrumbs.push({
+          name: category.name,
+          href: '#'
+        });
+      }
+    }
+    
+    return breadcrumbs;
+  }
+
 
 
 
@@ -138,7 +189,7 @@ export default function CategoryDetailPage() {
         onSubCategoryChange: handleSubCategoryChange
       }}
     >
-      <div className="container mx-auto px-2 py-6">
+      <div className=" mx-auto px-6 py-6">
         {loading ? (
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6"></div>
@@ -168,17 +219,47 @@ export default function CategoryDetailPage() {
           </div>
         ) : (
           <>
+            {/* 面包屑导航 */}
+            <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+              {getBreadcrumbs().map((crumb, index) => (
+                <div key={index} className="flex items-center">
+                  {index > 0 && <ChevronRight className="w-4 h-4 mx-2" />}
+                  {index === getBreadcrumbs().length - 1 ? (
+                    <span className="text-gray-900 dark:text-white font-medium">{crumb.name}</span>
+                  ) : (
+                    <Link 
+                      href={crumb.href} 
+                      className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      {crumb.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </nav>
+
             {/* 分类标题 */}
-            <div className="flex items-center mb-8">
-              <CategoryIcon 
-                iconUrl={activeSubCategory ? category.children.find(c => c.id === activeSubCategory)?.iconUrl : category.iconUrl}
-                name={getCurrentCategoryName()}
-                className="w-12 h-12 mr-4"
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <div className="text-center mb-8">
+              <div className="mb-4">
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
                   {getCurrentCategoryName()}
                 </h1>
+              </div>
+              
+              {/* 分类描述 */}
+              <div className="text-gray-600 dark:text-gray-400 text-lg max-w-4xl mx-auto">
+                <p>
+                  {getCurrentCategoryName()}收录 {getCurrentWebsites().length} 款{getCurrentCategoryName()}网站
+                  {getPopularWebsiteNames().length > 0 && (
+                    <>
+                      ，热门的网站有：
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {getPopularWebsiteNames().join('、')}
+                      </span>
+                    </>
+                  )}
+                  ，会持续更新
+                </p>
               </div>
             </div>
 
