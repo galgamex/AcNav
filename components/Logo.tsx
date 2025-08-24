@@ -17,9 +17,9 @@ const sizeClasses = {
 };
 
 const textSizeClasses = {
-  sm: 'text-sm',
-  md: 'text-base',
-  lg: 'text-lg'
+  sm: 'text-base',
+  md: 'text-xl',
+  lg: 'text-2xl'
 };
 
 export function Logo({ className = '', onClick, showText = true, size = 'md' }: LogoProps) {
@@ -68,7 +68,7 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
         />
       )}
       {showText && (
-        <span className={`${isVertical ? 'mt-4' : 'ml-4'} font-semibold text-gray-900 dark:text-white ${textSizeClasses[size]} ${isVertical ? 'text-center' : 'truncate'}`}>
+        <span className={`${isVertical ? 'mt-4' : 'ml-4'} font-semibold text-gray-900 dark:text-white ${textSizeClasses[size]} ${isVertical ? 'text-center' : 'truncate'} font-fangzheng`}>
           {logoSettings.siteName}
         </span>
       )}

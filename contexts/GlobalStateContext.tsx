@@ -148,7 +148,7 @@ const loadStateFromStorage = () => {
   }>(
     STORAGE_KEYS.LOGO_SETTINGS, 
     CACHE_CONFIG.LOGO_SETTINGS
-  ) || { siteName: 'AcMoe', logoUrl: '/Logo/Logo.png', logoText: '' };
+  ) || { siteName: 'AcMoe导航', logoUrl: '/Logo/Logo.png', logoText: '' };
   
   return {
     isDark,
@@ -207,7 +207,7 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
 
       // 直接使用默认Logo设置，不再调用API
       const logoSettings = {
-        siteName: 'AcMoe',
+        siteName: 'AcMoe导航',
         logoUrl: '/Logo/Logo.png',
         logoText: ''
       };

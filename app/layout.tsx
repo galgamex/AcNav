@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AcMoe - 导航站',
+  title: 'AcMoe - 精选优质网站导航',
   description: '精选优质网站导航',
   icons: {
     icon: '/Logo/Logo.png',
@@ -27,6 +27,10 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap"
         />
       </head>
       <body className={inter.className}>
