@@ -11,12 +11,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tag as PrismaTag } from '@prisma/client';
+interface Tag {
+  id: number;
+  name: string;
+  color: string | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface TagFormProps {
   isOpen: boolean;
   onClose: () => void;
-  tag?: PrismaTag | null;
+  tag?: Tag | null;
   onSuccess: () => void;
 }
 
