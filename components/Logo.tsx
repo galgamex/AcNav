@@ -26,13 +26,6 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
   const { state } = useGlobalState();
   const { logoSettings, isLoading } = state;
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    if (target.src !== '/Logo/Logo.png') {
-      target.src = '/Logo/Logo.png';
-    }
-  };
-
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -71,9 +64,7 @@ export function Logo({ className = '', onClick, showText = true, size = 'md' }: 
           width={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
           height={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
           className={`${sizeClasses[size]} flex-shrink-0 object-contain`}
-          onError={() => {
-            // Next.js Image组件会自动处理错误
-          }}
+          unoptimized={true}
         />
       )}
       {showText && (

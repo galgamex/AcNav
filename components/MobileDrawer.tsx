@@ -688,12 +688,13 @@ export function MobileDrawer({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <Link href="/" className="flex items-center" onClick={onClose}>
             <Image 
-              src="/logo.png" 
+              src="/Logo/Logo.png" 
               alt="网站Logo" 
               width={32}
               height={32}
               className="w-8 h-8 mr-3 cursor-pointer hover:opacity-80 transition-opacity"
               title="返回首页"
+              unoptimized={true}
             />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               {mode === 'category' ? '分类详情' : 

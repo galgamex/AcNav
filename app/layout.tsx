@@ -7,9 +7,13 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AcNavs - 极简网址导航',
-  description: '以极简为目的的网址导航系统',
-  keywords: ['导航', '网址', '书签', 'navigation', 'bookmark'],
+  title: 'AcNav - 导航站',
+  description: '精选优质网站导航',
+  icons: {
+    icon: '/Logo/Logo.png',
+    shortcut: '/Logo/Logo.png',
+    apple: '/Logo/Logo.png',
+  },
 };
 
 export default function RootLayout({
