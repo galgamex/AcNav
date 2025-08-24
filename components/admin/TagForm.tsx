@@ -16,8 +16,8 @@ interface Tag {
   name: string;
   color: string | null;
   description: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface TagFormProps {
