@@ -150,49 +150,7 @@ body {
   margin: 10px 20px 10px 0px;
 }
 
-/* 网站卡片样式 */
-.website-card {
-  width: 300px;
-  height: 110px;
-  border-radius: 8px;
-  background: var(--card-bg);
-  box-shadow: var(--card-shadow);
-  display: flex;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.website-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.website-icon {
-  padding: 20px;
-}
-
-.website-info {
-  display: flex;
-  flex-direction: column;
-  padding: 20px 20px 20px 0;
-  flex: 1;
-}
-
-.website-name {
-  margin: 0 0 6px 0;
-  color: var(--text-color);
-}
-
-.website-description {
-  margin: 0;
-  color: var(--text-color-secondary);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 3em;
-}
+/* 网站卡片样式已迁移到组件内部使用Tailwind CSS */
 
 /* Tooltip 样式 */
 .tooltip {
@@ -253,26 +211,11 @@ body {
     padding-bottom: 40px;
   }
   
-  .website-card {
-    width: calc(50% - 10px);
-    height: 90px;
-    margin: 5px;
-  }
-  
-  .website-icon {
-    padding: 12px;
-  }
-  
-  .website-info {
-    padding: 12px 12px 12px 0;
-  }
+  /* 移动端网站卡片样式已迁移到组件内部 */
 }
 
 @media (max-width: 480px) {
-  .website-card {
-    width: 100%;
-    margin: 5px 0;
-  }
+  /* 小屏幕网站卡片样式已迁移到组件内部 */
   
   .sidebar {
     margin: 0 15px 16px 15px;

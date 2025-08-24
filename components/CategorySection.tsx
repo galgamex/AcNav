@@ -124,7 +124,7 @@ export function CategorySection({ category, activeSubCategoryId, onTabChange, fr
             iconUrl={category.iconUrl}
             name={category.name}
             size={24}
-            className="mr-2"
+            className="mr-2 hidden sm:block"
         />
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             {category.name}

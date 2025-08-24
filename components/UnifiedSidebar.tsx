@@ -257,7 +257,9 @@ export function UnifiedSidebar({
         });
         
         // 转换为侧边栏分类格式，只包含在主页设置中选中的分类
-        const selectedCategoryIds = homeData.homeSettings.sidebarCategories
+        const homeSettings = homeData?.homeSettings || {};
+        const sidebarCategoriesData = homeSettings.sidebarCategories || [];
+        const selectedCategoryIds = sidebarCategoriesData
           .filter((sc: any) => sc.categoryId && sc.name) // 过滤掉无效的分类
           .map((sc: any) => sc.categoryId);
         

@@ -44,8 +44,10 @@ export function MainContent({ showHeader = false }: MainContentProps) {
           categoriesResponse.json()
         ]);
 
-        const selectedCategoryIds = homeData.homeSettings?.sidebarCategories?.map((sc: any) => sc.categoryId) || [];
-        setShowRecommended(homeData.homeSettings?.showRecommended || false);
+        // 安全地访问homeSettings数据
+        const homeSettings = homeData?.homeSettings || {};
+        const selectedCategoryIds = homeSettings.sidebarCategories?.map((sc: any) => sc.categoryId) || [];
+        setShowRecommended(homeSettings.showRecommended || false);
         // API直接返回分类数组
         const allCategories = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || []);
         

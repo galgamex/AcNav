@@ -105,7 +105,7 @@ export function WebsiteCard({ website, isRecommended = false, fromCategory = fal
     <>
       <div 
         ref={cardRef}
-        className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-4 hover:shadow-md transition-all duration-200 cursor-pointer min-h-[80px] ${
+        className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 md:p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
           isRecommended 
             ? 'hover:border-yellow-400 dark:hover:border-yellow-500 ring-2 ring-yellow-200 dark:ring-yellow-800' 
             : 'hover:border-blue-300 dark:hover:border-blue-600'

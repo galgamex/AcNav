@@ -245,19 +245,16 @@ export function NavigationMobileDrawer({
         {/* 头部 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <Logo 
+            <Logo
               onClick={() => {
                 // 滚动到页面顶部，显示推荐区域
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 onClose();
               }}
-              showText={false}
+              showText={true}
               size="sm"
               className=""
             />
-            <h2 className="ml-3 text-lg font-semibold text-gray-900 dark:text-white">
-              导航分类
-            </h2>
           </div>
           <button
             onClick={onClose}

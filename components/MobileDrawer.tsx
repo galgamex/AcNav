@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CategoryIcon } from './CategoryIcon';
+import { Logo } from './Logo';
 import { useGlobalState } from '@/contexts/GlobalStateContext';
 import { Category } from '@/types';
 
@@ -249,7 +250,9 @@ export function MobileDrawer({
         });
         
         // 转换为侧边栏分类格式，只包含在主页设置中选中的分类
-        const selectedCategoryIds = homeData.homeSettings.sidebarCategories
+        const homeSettings = homeData?.homeSettings || {};
+        const sidebarCategoriesData = homeSettings.sidebarCategories || [];
+        const selectedCategoryIds = sidebarCategoriesData
           .filter((sc: any) => sc.categoryId && sc.name) // 过滤掉无效的分类
           .map((sc: any) => sc.categoryId);
         
@@ -686,22 +689,14 @@ export function MobileDrawer({
       }`} style={{ top: '48px', height: 'calc(100vh - 48px)' }}>
         {/* 头部 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <Link href="/" className="flex items-center" onClick={onClose}>
-            <Image 
-              src="/Logo/Logo.png" 
-              alt="网站Logo" 
-              width={32}
-              height={32}
-              className="w-8 h-8 mr-3 cursor-pointer hover:opacity-80 transition-opacity"
-              title="返回首页"
-              unoptimized={true}
-            />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              {mode === 'category' ? '分类详情' : 
-               mode === 'website' ? '网站详情' : 
-               mode === 'navigation' ? '导航页' : '导航分类'}
-            </h2>
-          </Link>
+          <Logo 
+            className=""
+            onClick={() => {
+              onClose();
+            }}
+            showText={true}
+            size="sm"
+          />
         </div>
 
         {/* 移动端导航内容 */}
