@@ -117,8 +117,8 @@ export async function PUT(
         if (existingSubmission.tags) {
           const tagNames = existingSubmission.tags
             .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag.length > 0);
+            .map((tag: string) => tag.trim())
+            .filter((tag: string) => tag.length > 0);
           
           if (tagNames.length > 0) {
             // 获取刚创建的网站
