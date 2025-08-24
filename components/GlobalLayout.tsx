@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { Header } from './Header';
 import { UnifiedSidebar } from './UnifiedSidebar';
 import { MobileDrawer } from './MobileDrawer';
+import { Footer } from './Footer';
 import { useGlobalState } from '@/contexts/GlobalStateContext';
 
 interface GlobalLayoutProps {
@@ -69,6 +70,8 @@ export function GlobalLayout({
       }`}>
         {children}
       </main>
+      
+      <Footer />
     </div>
   );
 }
