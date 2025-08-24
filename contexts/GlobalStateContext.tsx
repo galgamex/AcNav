@@ -397,7 +397,7 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, [state.isDark]);
+  }, []); // 移除 state.isDark 依赖，只在组件挂载时执行一次
 
   // 监听系统主题变化
   useEffect(() => {

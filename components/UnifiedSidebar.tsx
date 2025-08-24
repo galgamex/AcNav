@@ -410,7 +410,7 @@ export function UnifiedSidebar({
     } else {
       setLoading(false);
     }
-  }, [mode, sidebarCategories, fetchHomeSettings, processNavigationCategories]);
+  }, [mode, sidebarCategories]); // 移除 fetchHomeSettings 和 processNavigationCategories 依赖
 
   // 返回首页的处理函数
   const handleGoHome = () => {

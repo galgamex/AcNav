@@ -91,8 +91,8 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
   const [error, setError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 使用useCallback优化fetchData函数
-  const fetchData = useCallback(async () => {
+  // 获取数据的函数
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -114,7 +114,7 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
     } finally {
       setLoading(false);
     }
-  }, [websiteId, days]);
+  };
 
   // 使用useMemo优化图表数据格式化 - 必须在所有条件返回之前调用
   const chartData = useMemo(() => {
@@ -141,7 +141,7 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
     if (isVisible) {
       fetchData();
     }
-  }, [fetchData, isVisible]);
+  }, [websiteId, days, isVisible]); // 移除 fetchData 依赖，直接使用 websiteId 和 days
 
   if (!isVisible || loading) {
     return (

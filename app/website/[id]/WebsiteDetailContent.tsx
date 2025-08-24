@@ -120,7 +120,7 @@ export function WebsiteDetailContent({ categories, onWebsiteUpdate, loading: ext
     fetchWebsite();
     fetchTags();
     fetchAvailableTags();
-  }, [websiteId, onWebsiteUpdate]);
+  }, [websiteId]); // 移除 onWebsiteUpdate 依赖
 
   const handleBack = () => {
     if (fromCategory && categoryId) {
