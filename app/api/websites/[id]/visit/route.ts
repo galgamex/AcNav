@@ -48,7 +48,7 @@ export async function POST(
     const today = getTodayDate();
 
     // 使用事务来确保数据一致性
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 查找今天的访问记录
       let visitRecord = await tx.websiteVisit.findUnique({
         where: {
