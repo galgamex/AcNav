@@ -23,7 +23,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // 获取所有分类
     const categories = await prisma.category.findMany({
-      where: { isActive: true },
       select: {
         id: true,
         updatedAt: true,
@@ -32,7 +31,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // 获取所有网站
     const websites = await prisma.website.findMany({
-      where: { isActive: true },
       select: {
         id: true,
         updatedAt: true,
