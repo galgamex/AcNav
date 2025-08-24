@@ -98,12 +98,6 @@ export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollaps
         </div>
         
         <div className="flex items-center space-x-1 md:space-x-2">
-          <Link href="/admin">
-            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
-          
           <Link href="/submit">
             <Button 
               variant="ghost" 
