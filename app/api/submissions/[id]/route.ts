@@ -184,7 +184,7 @@ export async function PUT(
       return NextResponse.json(
         {
           message: '数据验证失败',
-          errors: error.errors.map(err => ({
+          errors: error.errors.map((err: any) => ({
             field: err.path.join('.'),
             message: err.message
           }))

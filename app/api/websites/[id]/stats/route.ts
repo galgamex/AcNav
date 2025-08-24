@@ -93,7 +93,7 @@ export async function GET(
       visitMap.set(dateKey, visit);
     });
 
-    const statsData = dateRange.map(date => {
+    const statsData = dateRange.map((date: Date) => {
       const dateKey = date.toISOString().split('T')[0];
       const visit = visitMap.get(dateKey);
       

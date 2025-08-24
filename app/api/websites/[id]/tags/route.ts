@@ -53,7 +53,7 @@ export async function GET(
       }
     });
 
-    const tags = websiteTags.map(wt => wt.tag);
+    const tags = websiteTags.map((wt: { tag: any }) => wt.tag);
 
     // 缓存结果
     await cache.set(cacheKey, tags, 30 * 60);

@@ -52,7 +52,7 @@ export async function fetchWebsiteInfo(url: string): Promise<WebsiteInfo> {
     // 提取关键词
     const keywords = $('meta[name="keywords"]').attr('content');
     if (keywords) {
-      info.keywords = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      info.keywords = keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0);
     }
 
     // 提取图标

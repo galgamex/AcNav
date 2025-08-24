@@ -67,7 +67,7 @@ export async function GET(
       }
     });
 
-    const websites = websiteTags.map(wt => wt.website);
+    const websites = websiteTags.map((wt: { website: any }) => wt.website);
 
     // 缓存结果
     try {

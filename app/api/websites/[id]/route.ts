@@ -153,7 +153,7 @@ export async function PUT(
         // 创建网站标签关联
         if (tagIds.length > 0) {
           await prisma.websiteTag.createMany({
-            data: tagIds.map(tagId => ({
+            data: tagIds.map((tagId: number) => ({
               websiteId: websiteId,
               tagId: tagId
             })),
