@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, X, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 // 移除直接导入SM.MS API
 
 interface ImageUploaderProps {
@@ -201,9 +202,11 @@ export function ImageUploader({
           ) : (
             <div className="space-y-2">
               <div className="relative inline-block">
-                <img
+                <Image
                   src={previewUrl!}
                   alt="预览"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-cover rounded border"
                 />
                 <Button
@@ -211,6 +214,7 @@ export function ImageUploader({
                   size="icon"
                   className="absolute -top-2 -right-2 w-6 h-6"
                   onClick={handleClear}
+                  aria-label="删除图片"
                 >
                   <X className="w-3 h-3" />
                 </Button>

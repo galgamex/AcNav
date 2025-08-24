@@ -192,11 +192,36 @@ export default function CategoryDetailPage() {
       <div className=" mx-auto px-6 py-6">
         {loading ? (
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6"></div>
-            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            {/* 面包屑骨架 */}
+            <div className="flex items-center space-x-2 mb-6">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+            </div>
+            
+            {/* 标题骨架 */}
+            <div className="text-center mb-8">
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto mb-4"></div>
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-96 mx-auto"></div>
+            </div>
+            
+            {/* Tab骨架 */}
+            <div className="flex space-x-8 mb-8 border-b border-gray-200 dark:border-gray-700">
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+            </div>
+            
+            {/* 网站卡片骨架 */}
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded flex-1"></div>
+                  </div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                </div>
               ))}
             </div>
           </div>

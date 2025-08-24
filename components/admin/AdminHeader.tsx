@@ -35,6 +35,7 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
             size="icon"
             onClick={onToggleMobileDrawer}
             className="md:hidden"
+            aria-label="打开移动端菜单"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -51,11 +52,12 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
             onClick={handleGoHome}
             className="h-8 w-8 md:h-10 md:w-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
             title="返回首页"
+            aria-label="返回首页"
           >
             <Home className="h-4 w-4" />
           </Button>
           
-          <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10">
+          <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" aria-label="设置">
             <Settings className="h-4 w-4" />
           </Button>
           
@@ -64,6 +66,7 @@ export function AdminHeader({ onToggleMobileDrawer }: AdminHeaderProps) {
             size="icon"
             onClick={handleLogout}
             className="h-8 w-8 md:h-10 md:w-10"
+            aria-label="退出登录"
           >
             <LogOut className="h-4 w-4" />
           </Button>

@@ -365,13 +365,6 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
     
     const initializeApp = async () => {
-      // 立即应用主题到DOM
-      if (state.isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      
       if (isMounted) {
         // 检查是否已有缓存数据，如果有则设置对应的loading状态为false
         setState(prev => ({
@@ -383,12 +376,14 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
           }
         }));
         
-        // 强制初始化所有数据（第一次加载）
-        await Promise.all([
+        // 异步初始化数据，不阻塞渲染
+        Promise.all([
           fetchLogoSettings(true),
           fetchSidebarSettings(true),
           fetchNavigationPages(true)
-        ]);
+        ]).catch(error => {
+          console.error('初始化数据失败:', error);
+        });
       }
     };
     

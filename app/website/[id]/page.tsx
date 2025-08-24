@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { WebsiteDetailContent } from './WebsiteDetailContent';
 import { GlobalLayout } from '@/components/GlobalLayout';
 import { Category } from '@/types';
@@ -51,11 +51,11 @@ export default function WebsiteDetailPage() {
 
 
 
-  // 处理网站数据更新
-  const handleWebsiteUpdate = (websiteData: Website) => {
+  // 处理网站数据更新 - 使用useCallback防止无限重渲染
+  const handleWebsiteUpdate = useCallback((websiteData: Website) => {
     setWebsite(websiteData);
     setLoading(false);
-  };
+  }, []);
 
 
   

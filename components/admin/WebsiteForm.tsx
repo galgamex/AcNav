@@ -19,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { ImageUploader } from './ImageUploader';
+import Image from 'next/image';
 
 interface WebsiteFormProps {
   isOpen: boolean;
@@ -228,9 +229,11 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
               {formData.iconUrl && (
                 <div className="flex items-center gap-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
                   <ImageIcon className="h-4 w-4 text-gray-500" />
-                  <img
+                  <Image
                     src={formData.iconUrl}
                     alt="网站图标"
+                    width={24}
+                    height={24}
                     className="w-6 h-6 object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';

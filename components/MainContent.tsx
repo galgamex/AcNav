@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { SearchBar } from './SearchBar';
-import { CategorySection } from './CategorySection';
-import { RecommendedSection } from './RecommendedSection';
 import { Website, Category } from '@/types';
+
+// 懒加载组件以减少初始包大小
+const CategorySection = lazy(() => import('./CategorySection').then(module => ({ default: module.CategorySection })));
+const RecommendedSection = lazy(() => import('./RecommendedSection').then(module => ({ default: module.RecommendedSection })));
 
 interface MainContentProps {
   showHeader?: boolean;
@@ -156,7 +158,18 @@ export function MainContent({ showHeader = false }: MainContentProps) {
           <div className="space-y-12">
             {/* 推荐专区 */}
             {showRecommended && (
-              <RecommendedSection className="mb-12" />
+              <Suspense fallback={
+                <div className="mb-12 animate-pulse">
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-48"></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              }>
+                <RecommendedSection className="mb-12" />
+              </Suspense>
             )}
             
             {/* 分类区块显示 */}
@@ -164,11 +177,25 @@ export function MainContent({ showHeader = false }: MainContentProps) {
               categories.map((category) => {
                 return (
                   <div key={category.id} id={`category-${category.id}`} className="scroll-mt-20">
-                    <CategorySection 
-                      category={category} 
-                      activeSubCategoryId={activeSubCategoryId || undefined}
-                      onTabChange={handleSubCategoryActivate}
-                    />
+                    <Suspense fallback={
+                      <div className="animate-pulse min-h-[200px]">
+                        <div className="flex items-center justify-between mb-4 min-h-[40px]">
+                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64"></div>
+                          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                          {[...Array(12)].map((_, i) => (
+                            <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                          ))}
+                        </div>
+                      </div>
+                    }>
+                      <CategorySection 
+                        category={category} 
+                        activeSubCategoryId={activeSubCategoryId || undefined}
+                        onTabChange={handleSubCategoryActivate}
+                      />
+                    </Suspense>
                   </div>
                 );
               })

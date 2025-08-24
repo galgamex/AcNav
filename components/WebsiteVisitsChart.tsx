@@ -1,17 +1,22 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+// 动态导入recharts以减少初始包大小
+const loadRechartsComponents = async () => {
+  const recharts = await import('recharts')
+  return {
+    BarChart: recharts.BarChart,
+    Bar: recharts.Bar,
+    XAxis: recharts.XAxis,
+    YAxis: recharts.YAxis,
+    CartesianGrid: recharts.CartesianGrid,
+    Tooltip: recharts.Tooltip,
+    Legend: recharts.Legend,
+    ResponsiveContainer: recharts.ResponsiveContainer
+  }
+}
 
 interface DailyStats {
   date: string;
@@ -85,11 +90,13 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
 
 CustomTooltip.displayName = 'CustomTooltip';
 
-function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
+export default function WebsiteVisitsChart({ websiteId, days = 7 }: WebsiteVisitsChartProps) {
   const [data, setData] = useState<VisitsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [rechartsComponents, setRechartsComponents] = useState<any>(null);
+  const [chartsLoading, setChartsLoading] = useState(false);
 
   // 获取数据的函数
   const fetchData = useCallback(async () => {
@@ -136,6 +143,19 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // 动态加载recharts组件
+  useEffect(() => {
+    if (isVisible && !rechartsComponents && !chartsLoading) {
+      setChartsLoading(true)
+      loadRechartsComponents().then((components) => {
+        setRechartsComponents(components)
+        setChartsLoading(false)
+      }).catch(() => {
+        setChartsLoading(false)
+      })
+    }
+  }, [isVisible, rechartsComponents, chartsLoading])
 
   useEffect(() => {
     if (isVisible) {
@@ -220,9 +240,14 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
 
         {/* 条形图 - 使用懒加载优化性能 */}
         <div className="h-80">
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+          {chartsLoading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-2 text-gray-500">加载图表组件...</span>
+            </div>
+          ) : rechartsComponents && chartData.length > 0 ? (
+            <rechartsComponents.ResponsiveContainer width="100%" height="100%">
+              <rechartsComponents.BarChart
                 data={chartData}
                 margin={{
                   top: 20,
@@ -231,36 +256,36 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
                   bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis 
+                <rechartsComponents.CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <rechartsComponents.XAxis 
                   dataKey="date" 
                   tick={{ fontSize: 12 }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar 
+                <rechartsComponents.YAxis tick={{ fontSize: 12 }} />
+                <rechartsComponents.Tooltip content={<CustomTooltip />} />
+                <rechartsComponents.Legend />
+                <rechartsComponents.Bar 
                   dataKey="mobileVisits" 
                   stackId="a" 
                   fill="#3b82f6" 
                   name="移动端访问"
                   radius={[0, 0, 0, 0]}
                 />
-                <Bar 
+                <rechartsComponents.Bar 
                   dataKey="desktopVisits" 
                   stackId="a" 
                   fill="#10b981" 
                   name="PC端访问"
                   radius={[4, 4, 0, 0]}
                 />
-              </BarChart>
-            </ResponsiveContainer>
+              </rechartsComponents.BarChart>
+            </rechartsComponents.ResponsiveContainer>
           ) : (
             <div className="h-full flex items-center justify-center text-gray-500">
-              暂无访问数据
+              {rechartsComponents ? '暂无访问数据' : '图表组件加载失败'}
             </div>
           )}
         </div>
@@ -270,4 +295,4 @@ function WebsiteVisitsChart({ websiteId, days = 30 }: WebsiteVisitsChartProps) {
 }
 
 // 使用React.memo优化组件性能
-export default React.memo(WebsiteVisitsChart);
+// export default React.memo(WebsiteVisitsChart); // 已在函数声明处导出
