@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma';
 import { TagManagement } from '@/components/admin/TagManagement';
 import { AuthGuard } from '@/components/admin/AuthGuard';
 
+// 强制动态渲染，因为使用了 cookies
+export const dynamic = 'force-dynamic';
+
 type TagWithCount = {
   id: number;
   name: string;

@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma';
 import { WebsiteManagement } from '@/components/admin/WebsiteManagement';
 import { AuthGuard } from '@/components/admin/AuthGuard';
 
+// 强制动态渲染，因为使用了 cookies
+export const dynamic = 'force-dynamic';
+
 async function getWebsitesAndCategories() {
   const [websites, categories] = await Promise.all([
     prisma.website.findMany({

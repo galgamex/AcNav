@@ -3,6 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FolderOpen, Globe, BarChart3 } from 'lucide-react';
 import { AuthGuard } from '@/components/admin/AuthGuard';
 
+// 强制动态渲染，因为使用了 cookies
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   const [categoriesCount, websitesCount] = await Promise.all([
     prisma.category.count(),

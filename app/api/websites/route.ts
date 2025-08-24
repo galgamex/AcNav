@@ -6,6 +6,9 @@ import { z } from 'zod';
 import { generateIconUrl } from '@/lib/utils';
 import { fetchWebsiteInfo } from '@/lib/website-scraper';
 
+// 强制动态渲染
+export const dynamic = 'force-dynamic';
+
 const createWebsiteSchema = z.object({
   name: z.string().optional(),
   url: z.string().url('请输入有效的URL'),

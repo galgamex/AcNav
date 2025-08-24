@@ -2,6 +2,9 @@ import { prisma } from '@/lib/prisma';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { AuthGuard } from '@/components/admin/AuthGuard';
 
+// 强制动态渲染，避免构建时数据库连接
+export const dynamic = 'force-dynamic';
+
 interface Category {
   id: number;
   name: string;
