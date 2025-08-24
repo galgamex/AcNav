@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FolderOpen, Globe, BarChart3 } from 'lucide-react';
-import { AuthGuard } from '@/components/admin/AuthGuard';
 
 // 强制动态渲染，因为使用了 cookies
 export const dynamic = 'force-dynamic';
@@ -22,8 +21,7 @@ export default async function AdminDashboard() {
   const stats = await getStats();
 
   return (
-    <AuthGuard>
-      <div className="space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           管理概览
@@ -110,6 +108,5 @@ export default async function AdminDashboard() {
         </CardContent>
       </Card>
     </div>
-    </AuthGuard>
   );
 }

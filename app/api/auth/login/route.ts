@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies();
     cookieStore.set('admin-session', admin.id.toString(), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // 在开发和生产环境都设置为 false，避免 HTTPS 问题
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 天
     });

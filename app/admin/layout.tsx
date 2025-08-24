@@ -41,9 +41,16 @@ export default function AdminLayout({
     );
   }
 
-  // 如果未认证且不在登录页，重定向到登录页
+  // 如果未认证且不在登录页，显示加载状态
   if (!isAuthenticated && pathname !== '/admin/login') {
-    return null; // 让useAuth hook处理重定向
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">验证中...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
