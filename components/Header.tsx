@@ -115,7 +115,7 @@ export function Header({ onToggleSidebar, onToggleMobileDrawer, isSidebarCollaps
             onClick={actions.toggleTheme}
             className="h-8 w-8 md:h-10 md:w-10"
           >
-            {isDark ? (
+            {isClient && isDark ? (
               <Sun className="h-4 w-4" />
             ) : (
               <Moon className="h-4 w-4" />

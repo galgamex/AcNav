@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, FolderOpen, Globe, Settings, Tag, FileText, Layout } from 'lucide-react';
+import { Home, FolderOpen, Globe, Settings, Tag, FileText, Layout, Upload } from 'lucide-react';
 
 const navigation = [
   { name: '概览', href: '/admin', icon: Home },
@@ -12,7 +12,7 @@ const navigation = [
   { name: '网站管理', href: '/admin/websites', icon: Globe },
   { name: '标签管理', href: '/admin/tags', icon: Tag },
   { name: '收录申请', href: '/admin/submissions', icon: FileText },
-
+  { name: '图片上传', href: '/admin/upload', icon: Upload },
   { name: '设置', href: '/admin/settings', icon: Settings },
 ];
 

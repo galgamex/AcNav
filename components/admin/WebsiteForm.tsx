@@ -17,7 +17,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { ImageUploader } from './ImageUploader';
 
 interface WebsiteFormProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
   const [tagInput, setTagInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showImageUploader, setShowImageUploader] = useState(false);
 
   // 当网站数据变化时，更新选中的标签
   useEffect(() => {
@@ -135,6 +137,17 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
     }
   };
 
+  // 处理图片上传成功
+  const handleImageUploadSuccess = (imageUrl: string) => {
+    setFormData({ ...formData, iconUrl: imageUrl });
+    setShowImageUploader(false);
+  };
+
+  // 处理图片上传错误
+  const handleImageUploadError = (error: string) => {
+    console.error('图片上传失败:', error);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
@@ -190,13 +203,45 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="iconUrl">图标URL</Label>
-            <Input
-              id="iconUrl"
-              value={formData.iconUrl}
-              onChange={(e) => setFormData({ ...formData, iconUrl: e.target.value })}
-              placeholder="图标URL（可选，会自动获取）"
-            />
+            <Label htmlFor="iconUrl">网站图标</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="iconUrl"
+                  value={formData.iconUrl}
+                  onChange={(e) => setFormData({ ...formData, iconUrl: e.target.value })}
+                  placeholder="图标URL（可选，会自动获取）"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowImageUploader(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  上传
+                </Button>
+              </div>
+              
+              {/* 图标预览 */}
+              {formData.iconUrl && (
+                <div className="flex items-center gap-2 p-2 border border-gray-200 dark:border-gray-700 rounded-md">
+                  <ImageIcon className="h-4 w-4 text-gray-500" />
+                  <img
+                    src={formData.iconUrl}
+                    alt="网站图标"
+                    className="w-6 h-6 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {formData.iconUrl}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -322,6 +367,38 @@ export function WebsiteForm({ isOpen, onClose, website, categories, tags, onSucc
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* 图片上传对话框 */}
+      <Dialog open={showImageUploader} onOpenChange={setShowImageUploader}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5" />
+              上传网站图标
+            </DialogTitle>
+            <DialogDescription>
+              选择图片文件上传到SM.MS图床，获取图标URL
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ImageUploader
+            onUploadSuccess={handleImageUploadSuccess}
+            onUploadError={handleImageUploadError}
+            maxSize={2}
+            acceptedTypes={['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']}
+          />
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowImageUploader(false)}
+            >
+              关闭
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
